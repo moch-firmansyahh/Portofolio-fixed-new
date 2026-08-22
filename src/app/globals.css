@@ -6,9 +6,9 @@
   --color-cream-surface: #FFFFFF;
   --color-dark-primary: #0F172A;
   --color-dark-muted: #64748B;
-  --color-accent-emerald: #059669;
-  --color-accent-emerald-hover: #047857;
-  --color-accent-emerald-light: #ECFDF5;
+  --color-accent-emerald: #0F172A;
+  --color-accent-emerald-hover: #1E293B;
+  --color-accent-emerald-light: #F1F5F9;
   --color-cream-border: #E2E8F0;
   --color-cream-border-light: #F1F5F9;
 
@@ -22,8 +22,8 @@
   --bg-surface: #FFFFFF;
   --text-primary: #0F172A;
   --text-muted: #64748B;
-  --accent-primary: #059669;
-  --accent-hover: #047857;
+  --accent-primary: #0F172A;
+  --accent-hover: #1E293B;
   --border-subtle: #E2E8F0;
   --border-light: #F1F5F9;
 }
@@ -31,6 +31,7 @@
 html {
   scroll-behavior: smooth;
   color-scheme: light;
+  scrollbar-gutter: stable;
 }
 
 body {
@@ -67,13 +68,13 @@ h1, h2, h3, h4, h5, h6 {
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #059669;
+  background: #0F172A;
 }
 
 /* Custom Text Selection */
 ::selection {
-  background-color: #D1FAE5;
-  color: #065F46;
+  background-color: #0F172A;
+  color: #FFFFFF;
 }
 
 /* Modern clean card shadow */
@@ -83,8 +84,4 @@ h1, h2, h3, h4, h5, h6 {
 
 .shadow-soft-hover {
   box-shadow: 0 16px 32px -4px rgba(15, 23, 42, 0.08), 0 4px 12px -2px rgba(15, 23, 42, 0.04);
-}
-
-.shadow-glow-emerald {
-  box-shadow: 0 8px 24px rgba(5, 150, 105, 0.25);
 }

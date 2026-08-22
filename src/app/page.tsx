@@ -1,6 +1,6 @@
 import SmoothScroll from "@/components/SmoothScroll";
+import Preloader from "@/components/Preloader";
 import AmbientCursor from "@/components/AmbientCursor";
-import CommandPalette from "@/components/CommandPalette";
 import Navbar from "@/components/Navbar";
 import HeroSection from "@/components/HeroSection";
 import TechMarquee from "@/components/TechMarquee";
@@ -14,12 +14,12 @@ import Footer from "@/components/Footer";
 export default function Home() {
   return (
     <SmoothScroll>
-      <div className="flex flex-col min-h-screen bg-[#F8F9FA] bg-grain-texture text-[#0F172A] relative selection:bg-[#D1FAE5] selection:text-[#065F46]">
-        {/* Smooth Ambient Follower Glow (Desktop) */}
-        <AmbientCursor />
+      <div className="flex flex-col min-h-screen bg-[#F8F9FA] bg-grain-texture text-[#0F172A] relative selection:bg-neutral-900 selection:text-white">
+        {/* Preloader Curtain Reveal */}
+        <Preloader />
 
-        {/* Command Palette Spotlight Menu (Ctrl+K) */}
-        <CommandPalette />
+        {/* Ambient Cursor Follower */}
+        <AmbientCursor />
 
         {/* Navigation Bar */}
         <Navbar />

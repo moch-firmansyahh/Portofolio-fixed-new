@@ -18,32 +18,24 @@ export default function ExperienceSection() {
   const lineHeight = useTransform(scrollYProgress, [0, 1], ["0%", "100%"]);
 
   return (
-    <section id="experience" className="py-24 md:py-32 bg-[#F1F5F9]/50 border-t border-[#E2E8F0] relative">
+    <section id="experience" className="py-32 md:py-44 bg-[#F1F5F9]/50 border-t border-[#E2E8F0] relative">
       <div className="max-w-[1200px] mx-auto px-6 md:px-12">
         {/* Section Header */}
         <ScrollReveal className="flex flex-col items-center text-center max-w-2xl mx-auto mb-16">
-          <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#059669] mb-3">
-            <span className="w-6 h-[2px] bg-[#059669]" />
-            <span>Riwayat &amp; Perjalanan</span>
-            <span className="w-6 h-[2px] bg-[#059669]" />
-          </div>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-[#0F172A] leading-tight mb-4">
-            Pendidikan &amp; Pengalaman
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-neutral-900 leading-tight">
+            Pengalaman &amp; Perjalanan.
           </h2>
-          <p className="text-base sm:text-lg text-[#64748B]">
-            Jejak langkah pendidikan, pembelajaran mandiri, dan pengembangan aplikasi web yang terus berkembang.
-          </p>
         </ScrollReveal>
 
         {/* Timeline List with dynamic scroll-linked animated center line */}
         <div
           ref={containerRef}
-          className="relative max-w-3xl mx-auto space-y-12 before:absolute before:inset-0 before:left-4 md:before:left-1/2 before:-translate-x-px before:h-full before:w-0.5 before:bg-[#E2E8F0]"
+          className="relative max-w-3xl mx-auto space-y-12 before:absolute before:inset-0 before:left-4 md:before:left-1/2 before:-translate-x-px before:h-full before:w-0.5 before:bg-neutral-200"
         >
           {/* Animated drawing line on scroll */}
           <motion.div
             style={{ height: lineHeight }}
-            className="absolute top-0 left-4 md:left-1/2 -translate-x-px w-0.5 bg-[#059669] z-0 origin-top shadow-xs"
+            className="absolute top-0 left-4 md:left-1/2 -translate-x-px w-0.5 bg-neutral-900 z-0 origin-top shadow-xs"
           />
 
           {EXPERIENCES.map((exp, index) => {
@@ -56,13 +48,13 @@ export default function ExperienceSection() {
                 } gap-6 md:gap-12`}
               >
                 {/* Timeline node with pulsing halo */}
-                <div className="absolute left-4 md:left-1/2 -translate-x-1/2 flex items-center justify-center w-8 h-8 rounded-full bg-[#FFFFFF] border-2 border-[#059669] shadow-soft z-10">
+                <div className="absolute left-4 md:left-1/2 -translate-x-1/2 flex items-center justify-center w-8 h-8 rounded-full bg-white border-2 border-neutral-900 shadow-xs z-10">
                   <motion.div
-                    animate={{ scale: [1, 1.45, 1], opacity: [0.8, 0.2, 0.8] }}
+                    animate={{ scale: [1, 1.35, 1], opacity: [0.6, 0.1, 0.6] }}
                     transition={{ repeat: Infinity, duration: 2.5, ease: "easeInOut" }}
-                    className="absolute inset-0 rounded-full bg-[#059669]/25 -z-10"
+                    className="absolute inset-0 rounded-full bg-neutral-900/20 -z-10"
                   />
-                  <div className="w-2.5 h-2.5 rounded-full bg-[#059669]" />
+                  <div className="w-2.5 h-2.5 rounded-full bg-neutral-900" />
                 </div>
 
                 {/* Content Card with ScrollReveal */}
@@ -74,21 +66,21 @@ export default function ExperienceSection() {
                     delay={index * 0.1}
                   >
                     <motion.div
-                      whileHover={{ y: -5, scale: 1.01 }}
+                      whileHover={{ y: -4, scale: 1.01 }}
                       transition={{ type: "spring", stiffness: 350, damping: 20 }}
-                      className="bg-[#FFFFFF] p-6 sm:p-7 rounded-2xl sm:rounded-3xl border border-[#E2E8F0] shadow-soft hover:shadow-soft-hover transition-all duration-300 cursor-default"
+                      className="bg-white p-6 sm:p-7 rounded-2xl sm:rounded-3xl border border-neutral-200 shadow-xs hover:shadow-md transition-all duration-300 cursor-default"
                     >
                       <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
-                        <span className="px-3 py-1 rounded-full bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0] text-xs font-bold shadow-xs">
+                        <span className="px-3 py-1 rounded-full bg-neutral-100 text-neutral-900 border border-neutral-300 text-xs font-bold shadow-xs">
                           {exp.period}
                         </span>
-                        <span className="text-xs text-[#64748B] flex items-center gap-1 font-medium">
+                        <span className="text-xs text-neutral-500 flex items-center gap-1 font-medium">
                           <MapPin className="w-3.5 h-3.5" />
                           {exp.location}
                         </span>
                       </div>
 
-                      <h3 className="text-xl font-bold text-[#0F172A]">
+                      <h3 className="text-xl font-bold text-neutral-900">
                         {exp.role}
                       </h3>
                       <p className="text-sm font-semibold text-[#64748B] mb-3">

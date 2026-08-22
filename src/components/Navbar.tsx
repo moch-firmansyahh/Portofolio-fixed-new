@@ -2,8 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, ArrowUpRight } from "lucide-react";
-import { PERSONAL_INFO } from "@/data/portfolioData";
+import { Menu, X } from "lucide-react";
 
 const NAV_LINKS = [
   { name: "About", href: "#about" },
@@ -14,28 +13,38 @@ const NAV_LINKS = [
 ];
 
 export default function Navbar() {
-  const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("");
+  const [hoveredNav, setHoveredNav] = useState<string | null>(null);
 
   useEffect(() => {
     const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
+      const scrollY = window.scrollY;
+      const aboutEl = document.getElementById("about");
 
-      const sections = NAV_LINKS.map((link) => link.href.substring(1));
-      const scrollPosition = window.scrollY + 200;
+      // When at the top / Hero Section, reset activeSection so no tab is highlighted
+      if (!aboutEl || scrollY < aboutEl.offsetTop - 250) {
+        setActiveSection("");
+        return;
+      }
 
-      for (const section of sections) {
-        const el = document.getElementById(section);
+      const scrollPosition = scrollY + 250;
+      let foundSection = "";
+
+      for (const link of NAV_LINKS) {
+        const sectionId = link.href.substring(1);
+        const el = document.getElementById(sectionId);
         if (el) {
           const top = el.offsetTop;
           const height = el.offsetHeight;
           if (scrollPosition >= top && scrollPosition < top + height) {
-            setActiveSection(section);
+            foundSection = sectionId;
             break;
           }
         }
       }
+
+      setActiveSection(foundSection);
     };
 
     window.addEventListener("scroll", handleScroll);
@@ -53,69 +62,59 @@ export default function Navbar() {
 
   return (
     <>
-      <header
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          scrolled
-            ? "py-3 bg-[#FFFFFF]/85 backdrop-blur-md border-b border-[#E2E8F0]/80 shadow-soft"
-            : "py-6 bg-transparent"
-        }`}
-      >
-        <div className="max-w-[1200px] mx-auto px-6 md:px-12 flex items-center justify-between">
-          {/* Logo / Brand */}
-          <a
-            href="#"
-            className="group flex items-center gap-2 text-lg font-bold tracking-tight text-[#0F172A]"
+      {/* Floating Center Navbar Dock */}
+      <header className="fixed top-0 left-0 right-0 z-50 pt-8 sm:pt-10 md:pt-12 pointer-events-none flex justify-center">
+        <div className="flex items-center justify-center pointer-events-auto px-6">
+          {/* Desktop Navigation: Premium Glassmorphic Dynamic Dock */}
+          <nav
+            onMouseLeave={() => setHoveredNav(null)}
+            className="hidden md:flex items-center gap-1.5 bg-white/80 backdrop-blur-2xl border border-white/90 p-2 rounded-full shadow-[0_14px_40px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)] ring-1 ring-black/5 transition-all"
           >
-            <span className="font-bold tracking-tight text-[#0F172A] group-hover:text-[#059669] transition-colors text-base sm:text-lg">
-              {PERSONAL_INFO.name}
-            </span>
-          </a>
-
-          {/* Desktop Navigation Links */}
-          <nav className="hidden md:flex items-center gap-1 bg-[#FFFFFF]/90 border border-[#E2E8F0] px-4 py-1.5 rounded-full shadow-soft backdrop-blur-sm">
             {NAV_LINKS.map((link) => {
               const isActive = activeSection === link.href.substring(1);
+              const isHovered = hoveredNav === link.name;
+
               return (
                 <a
                   key={link.name}
                   href={link.href}
+                  onMouseEnter={() => setHoveredNav(link.name)}
                   onClick={(e) => scrollToSection(e, link.href)}
-                  className={`relative px-4 py-1.5 text-sm font-medium transition-colors rounded-full ${
+                  className={`relative px-6 py-2.5 text-[15px] font-semibold transition-colors duration-200 rounded-full flex items-center gap-2 select-none ${
                     isActive
-                      ? "text-[#059669]"
-                      : "text-[#64748B] hover:text-[#0F172A]"
+                      ? "text-white font-bold"
+                      : "text-neutral-600 hover:text-neutral-950"
                   }`}
                 >
+                  {/* Active Dark Obsidian Pill */}
                   {isActive && (
                     <motion.span
                       layoutId="activeNavPill"
-                      className="absolute inset-0 bg-[#ECFDF5] rounded-full shadow-xs -z-10"
-                      transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                      className="absolute inset-0 bg-[#0D0D0D] rounded-full shadow-[0_4px_16px_rgba(0,0,0,0.2)] -z-10"
+                      transition={{ type: "spring", stiffness: 420, damping: 32 }}
                     />
                   )}
-                  {link.name}
+
+                  {/* Dynamic Sliding Hover Pill on Unselected Items */}
+                  {isHovered && !isActive && (
+                    <motion.span
+                      layoutId="hoverNavPill"
+                      className="absolute inset-0 bg-neutral-200/60 rounded-full -z-10"
+                      transition={{ type: "spring", stiffness: 450, damping: 35 }}
+                    />
+                  )}
+
+                  <span>{link.name}</span>
                 </a>
               );
             })}
           </nav>
 
-          {/* Desktop Right CTA */}
-          <div className="hidden md:flex items-center gap-3">
-            <a
-              href="#contact"
-              onClick={(e) => scrollToSection(e, "#contact")}
-              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-[#0F172A] hover:bg-[#1E293B] rounded-xl transition-all duration-200 shadow-soft hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0"
-            >
-              <span>Get in Touch</span>
-              <ArrowUpRight className="w-4 h-4 text-[#94A3B8]" />
-            </a>
-          </div>
-
-          {/* Mobile Menu Button */}
+          {/* Mobile Menu Button on Floating Glass Capsule */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label="Toggle Navigation Menu"
-            className="md:hidden p-2 rounded-xl bg-[#FFFFFF] border border-[#E2E8F0] text-[#0F172A] hover:text-[#059669] transition-colors focus:outline-none shadow-soft cursor-pointer"
+            className="md:hidden p-3.5 rounded-full bg-white/90 border border-neutral-200 text-neutral-900 hover:text-black transition-colors focus:outline-none shadow-md backdrop-blur-xl ring-1 ring-black/5 cursor-pointer"
           >
             {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
@@ -126,33 +125,23 @@ export default function Navbar() {
       <AnimatePresence>
         {mobileMenuOpen && (
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
+            initial={{ opacity: 0, y: -20, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -20, scale: 0.96 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-x-0 top-[65px] z-40 p-6 bg-[#FFFFFF] border-b border-[#E2E8F0] shadow-xl md:hidden flex flex-col gap-4"
+            className="fixed inset-x-4 top-24 z-50 p-5 bg-white/95 backdrop-blur-xl rounded-2xl border border-neutral-200 shadow-2xl md:hidden flex flex-col gap-2 pointer-events-auto ring-1 ring-black/5"
           >
-            <nav className="flex flex-col gap-2 pt-2">
+            <nav className="flex flex-col gap-1">
               {NAV_LINKS.map((link) => (
                 <a
                   key={link.name}
                   href={link.href}
                   onClick={(e) => scrollToSection(e, link.href)}
-                  className="px-4 py-2.5 text-base font-medium text-[#0F172A] hover:text-[#059669] hover:bg-[#ECFDF5] rounded-xl transition-colors"
+                  className="px-4 py-3 text-base font-semibold text-neutral-900 hover:text-white hover:bg-[#0D0D0D] rounded-xl transition-colors"
                 >
                   {link.name}
                 </a>
               ))}
-              <div className="pt-2">
-                <a
-                  href="#contact"
-                  onClick={(e) => scrollToSection(e, "#contact")}
-                  className="w-full py-3 flex items-center justify-center gap-2 text-sm font-semibold text-white bg-[#0F172A] hover:bg-[#1E293B] rounded-xl transition-colors shadow-soft"
-                >
-                  <span>Get in Touch</span>
-                  <ArrowUpRight className="w-4 h-4" />
-                </a>
-              </div>
             </nav>
           </motion.div>
         )}

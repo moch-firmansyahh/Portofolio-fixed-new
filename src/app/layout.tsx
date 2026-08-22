@@ -10,27 +10,36 @@ const jakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Moch. Firmansyah | Frontend Developer Portfolio",
+  title: "Moch. Firmansyah — Portfolio",
   description:
-    "Portfolio of Moch. Firmansyah — Frontend Developer specializing in React, Next.js, TypeScript, Tailwind CSS, and fluid interactive animations.",
+    "Portfolio of Moch. Firmansyah — Frontend Developer & Security Enthusiast specializing in React, Next.js, TypeScript, Tailwind CSS, and secure web architectures.",
+  icons: {
+    icon: [
+      { url: "/icon.jpg" },
+      { url: "/favicon.ico" },
+    ],
+    shortcut: "/favicon.ico",
+    apple: "/icon.jpg",
+  },
   keywords: [
+    "Moch. Firmansyah",
     "Frontend Developer",
+    "Cyber Security Enthusiast",
     "React Developer",
     "Next.js Portfolio",
     "TypeScript",
     "Tailwind CSS",
-    "Framer Motion",
-    "GSAP",
     "Web Developer Indonesia",
+    "Telkom University",
   ],
   authors: [{ name: "Moch. Firmansyah" }],
   creator: "Moch. Firmansyah",
   openGraph: {
-    title: "Moch. Firmansyah — Frontend Developer",
+    title: "Moch. Firmansyah — Portfolio",
     description:
-      "Crafting visually refined, high-performance web experiences with modern React, Next.js, and fluid animations.",
+      "Crafting visually refined, high-performance, and secure web experiences with modern React, Next.js, and fluid animations.",
     type: "website",
-    locale: "en_US",
+    locale: "id_ID",
   },
 };
 
@@ -40,7 +49,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${jakarta.variable} scroll-smooth`}>
+    <html lang="id" className={`${jakarta.variable} scroll-smooth`}>
       <body className="min-h-screen bg-[#F5EFE6] text-[#1A1A1A] font-sans antialiased selection:bg-[#F7EAE5] selection:text-[#B5654A]">
         {children}
       </body>

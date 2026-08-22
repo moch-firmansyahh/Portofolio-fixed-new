@@ -53,7 +53,7 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
             />
             <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-black/20" />
             <div className="absolute bottom-4 left-6 sm:left-8">
-              <span className="px-3 py-1 rounded-full bg-[#059669] text-white text-xs font-semibold shadow-soft">
+              <span className="px-3 py-1 rounded-full bg-[#0D0D0D] text-white text-xs font-semibold shadow-xs">
                 {project.category}
               </span>
             </div>
@@ -70,7 +70,7 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
                 {project.metrics && (
                   <>
                     <span>•</span>
-                    <span className="font-semibold text-[#059669]">
+                    <span className="font-semibold text-neutral-900">
                       {project.metrics}
                     </span>
                   </>
@@ -93,13 +93,13 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
             {project.highlights && project.highlights.length > 0 && (
               <div className="p-5 rounded-2xl bg-[#F8FAFC] border border-[#E2E8F0] space-y-3">
                 <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#0F172A]">
-                  <Sparkles className="w-4 h-4 text-[#059669]" />
+                  <Sparkles className="w-4 h-4 text-neutral-900" />
                   <span>Fitur &amp; Arsitektur Utama</span>
                 </div>
                 <ul className="space-y-2 text-xs sm:text-sm text-[#64748B]">
                   {project.highlights.map((highlight, idx) => (
                     <li key={idx} className="flex items-start gap-2.5">
-                      <CheckCircle2 className="w-4 h-4 text-[#059669] shrink-0 mt-0.5" />
+                      <CheckCircle2 className="w-4 h-4 text-neutral-900 shrink-0 mt-0.5" />
                       <span>{highlight}</span>
                     </li>
                   ))}
@@ -130,7 +130,7 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
                 href={project.demoUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-[#059669] hover:bg-[#047857] text-white font-semibold text-sm transition-all duration-200 shadow-soft hover:shadow-glow-emerald"
+                className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-[#0D0D0D] hover:bg-neutral-800 text-white font-semibold text-sm transition-all duration-200 shadow-xs"
               >
                 <span>Kunjungi Website Live</span>
                 <ExternalLink className="w-4 h-4" />
@@ -140,7 +140,7 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
                 href={project.githubUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-[#F8FAFC] hover:bg-white border border-[#E2E8F0] text-[#0F172A] hover:text-[#059669] font-semibold text-sm transition-colors"
+                className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-neutral-50 hover:bg-white border border-neutral-200 hover:border-neutral-400 text-neutral-900 hover:text-black font-semibold text-sm transition-colors"
               >
                 <GithubIcon className="w-4 h-4" />
                 <span>Source Code</span>

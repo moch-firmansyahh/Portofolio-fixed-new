@@ -1,18 +1,53 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { ArrowDown, ArrowUpRight } from "lucide-react";
 import { PERSONAL_INFO } from "@/data/portfolioData";
 import Magnetic from "./Magnetic";
 
+const TYPEWRITER_PHRASES = [
+  "Moch. Firmansyah",
+  "Frontend Developer",
+  "Security Enthusiast",
+  "Informatics Student",
+];
+
 export default function HeroSection() {
   const heroRef = useRef<HTMLDivElement>(null);
   const titleLine1Ref = useRef<HTMLHeadingElement>(null);
   const titleLine2Ref = useRef<HTMLHeadingElement>(null);
-  const subheadlineRef = useRef<HTMLParagraphElement>(null);
+  const subheadlineRef = useRef<HTMLDivElement>(null);
   const ctaGroupRef = useRef<HTMLDivElement>(null);
+
+  // Typewriter Loop (Type -> Pause -> Delete -> Next phrase)
+  const [phraseIndex, setPhraseIndex] = useState(0);
+  const [displayText, setDisplayText] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  useEffect(() => {
+    const currentPhrase = TYPEWRITER_PHRASES[phraseIndex];
+    const speed = isDeleting ? 30 : 70;
+
+    const timer = setTimeout(() => {
+      if (!isDeleting) {
+        setDisplayText(currentPhrase.substring(0, displayText.length + 1));
+        if (displayText === currentPhrase) {
+          // Pause at full word before deleting
+          setTimeout(() => setIsDeleting(true), 2000);
+        }
+      } else {
+        setDisplayText(currentPhrase.substring(0, displayText.length - 1));
+        if (displayText === "") {
+          setIsDeleting(false);
+          setPhraseIndex((prev) => (prev + 1) % TYPEWRITER_PHRASES.length);
+        }
+      }
+    }, speed);
+
+    return () => clearTimeout(timer);
+  }, [displayText, isDeleting, phraseIndex]);
 
   // Parallax on scroll
   const { scrollYProgress } = useScroll({
@@ -29,17 +64,14 @@ export default function HeroSection() {
     const ctx = gsap.context(() => {
       const tl = gsap.timeline({ defaults: { ease: "power4.out" } });
 
-      tl.from(
-        titleLine1Ref.current,
-        {
-          opacity: 0,
-          y: 50,
-          filter: "blur(10px)",
-          skewY: 1.5,
-          duration: 1.1,
-          delay: 0.1,
-        }
-      )
+      tl.from(titleLine1Ref.current, {
+        opacity: 0,
+        y: 50,
+        filter: "blur(10px)",
+        skewY: 1.5,
+        duration: 1.1,
+        delay: 0.1,
+      })
         .from(
           titleLine2Ref.current,
           {
@@ -108,7 +140,7 @@ export default function HeroSection() {
           repeat: Infinity,
           ease: "easeInOut",
         }}
-        className="absolute top-1/4 left-1/3 w-[450px] md:w-[700px] h-[350px] md:h-[480px] bg-gradient-to-tr from-[#EEF2F6] via-[#F8FAFC] to-[#ECFDF5] rounded-full blur-3xl -z-10 opacity-80 pointer-events-none"
+        className="absolute top-1/4 left-1/3 w-[450px] md:w-[700px] h-[350px] md:h-[480px] bg-gradient-to-tr from-[#EEF2F6] via-[#F8FAFC] to-[#F1F5F9] rounded-full blur-3xl -z-10 opacity-80 pointer-events-none"
       />
       <motion.div
         style={{ y: orb2Y }}
@@ -121,7 +153,7 @@ export default function HeroSection() {
           repeat: Infinity,
           ease: "easeInOut",
         }}
-        className="absolute bottom-1/4 right-1/4 w-[350px] md:w-[520px] h-[300px] md:h-[420px] bg-[#059669]/5 rounded-full blur-3xl -z-10 pointer-events-none"
+        className="absolute bottom-1/4 right-1/4 w-[350px] md:w-[520px] h-[300px] md:h-[420px] bg-neutral-900/3 rounded-full blur-3xl -z-10 pointer-events-none"
       />
 
       <motion.div
@@ -129,7 +161,7 @@ export default function HeroSection() {
         className="max-w-[1200px] w-full mx-auto px-6 md:px-12 flex flex-col items-start"
       >
         {/* Hero Title */}
-        <div className="space-y-1 md:space-y-2 mb-6">
+        <div className="space-y-1 md:space-y-2 mb-8">
           <h1
             ref={titleLine1Ref}
             className="text-[42px] sm:text-[58px] md:text-[80px] lg:text-[92px] font-extrabold tracking-[-0.035em] leading-[1.05] text-[#0F172A]"
@@ -138,59 +170,62 @@ export default function HeroSection() {
           </h1>
           <h1
             ref={titleLine2Ref}
-            className="text-[42px] sm:text-[58px] md:text-[80px] lg:text-[92px] font-extrabold tracking-[-0.035em] leading-[1.05] text-[#059669] flex items-center flex-wrap gap-3"
+            className="text-[42px] sm:text-[58px] md:text-[80px] lg:text-[92px] font-extrabold tracking-[-0.035em] leading-[1.05] text-[#0F172A] flex items-center flex-wrap gap-3"
           >
-            <span>UI Craftsman.</span>
+            <span className="relative inline-block">
+              <span className="text-[#0F172A] underline decoration-neutral-300 decoration-wavy decoration-2 underline-offset-8">
+                Security Enthusiast.
+              </span>
+            </span>
             <motion.span
               animate={{ rotate: [0, 15, -15, 0] }}
               transition={{ repeat: Infinity, duration: 5, ease: "easeInOut" }}
-              className="inline-block text-3xl sm:text-5xl md:text-6xl select-none"
+              className="inline-block text-2xl sm:text-4xl md:text-5xl select-none text-neutral-400"
             >
               ✦
             </motion.span>
           </h1>
         </div>
 
-        {/* Subheadline */}
-        <p
+        {/* Subheadline with Seamless Inline Typewriter Loop */}
+        <div
           ref={subheadlineRef}
-          className="max-w-2xl text-lg sm:text-xl md:text-2xl text-[#64748B] font-normal leading-relaxed mb-10 tracking-tight"
+          className="max-w-2xl text-lg sm:text-xl md:text-2xl text-neutral-600 font-normal leading-relaxed mb-10 tracking-tight"
         >
-          Hi, I am <span className="font-semibold text-[#0F172A]">{PERSONAL_INFO.name}</span>. {PERSONAL_INFO.tagline}
-        </p>
+          <div className="text-xl sm:text-2xl md:text-3xl font-normal text-neutral-800 mb-2">
+            <span>Hi, I am </span>
+            <span className="font-bold text-neutral-900 inline-block">
+              {displayText}
+              <span className="inline-block w-0.5 h-6 bg-neutral-900 ml-1 align-middle animate-pulse" />
+            </span>
+          </div>
+          <p className="text-base sm:text-lg text-neutral-600 font-normal leading-relaxed">
+            {PERSONAL_INFO.tagline}
+          </p>
+        </div>
 
-        {/* CTA Buttons Group with Magnetic pull & spring */}
+        {/* CTA Buttons Group - Calm & Subtle Hover */}
         <div
           ref={ctaGroupRef}
           className="flex flex-wrap items-center gap-4 w-full sm:w-auto"
         >
-          <Magnetic strength={0.25}>
-            <motion.a
-              href="#projects"
-              onClick={scrollToProjects}
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
-              transition={{ type: "spring", stiffness: 350, damping: 20 }}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-8 py-4 rounded-2xl bg-[#0F172A] hover:bg-[#1E293B] text-white font-semibold text-base transition-colors shadow-soft hover:shadow-xl cursor-pointer group"
-            >
-              <span>Explore Featured Work</span>
-              <ArrowDown className="w-4 h-4 text-[#94A3B8] transition-transform group-hover:translate-y-1" />
-            </motion.a>
-          </Magnetic>
+          <a
+            href="#projects"
+            onClick={scrollToProjects}
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 rounded-2xl bg-[#0D0D0D] hover:bg-neutral-800 text-white font-semibold text-base transition-colors duration-200 shadow-xs cursor-pointer group"
+          >
+            <span>Explore Featured Work</span>
+            <ArrowDown className="w-4 h-4 text-neutral-400 transition-transform group-hover:translate-y-0.5" />
+          </a>
 
-          <Magnetic strength={0.25}>
-            <motion.a
-              href="#contact"
-              onClick={scrollToContact}
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
-              transition={{ type: "spring", stiffness: 350, damping: 20 }}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-4 rounded-2xl bg-[#FFFFFF] hover:bg-[#F8FAFC] border border-[#E2E8F0] text-[#0F172A] hover:text-[#059669] font-semibold text-base transition-colors shadow-soft cursor-pointer group"
-            >
-              <span>Let&apos;s Connect</span>
-              <ArrowUpRight className="w-4 h-4 text-[#64748B] transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-            </motion.a>
-          </Magnetic>
+          <a
+            href="#contact"
+            onClick={scrollToContact}
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-4 rounded-2xl bg-white hover:bg-neutral-50 border border-neutral-200 hover:border-neutral-300 text-neutral-900 font-semibold text-base transition-colors duration-200 shadow-xs cursor-pointer group"
+          >
+            <span>Let&apos;s Connect</span>
+            <ArrowUpRight className="w-4 h-4 text-neutral-500 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+          </a>
         </div>
       </motion.div>
     </section>

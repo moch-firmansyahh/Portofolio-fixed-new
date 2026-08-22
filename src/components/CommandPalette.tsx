@@ -148,9 +148,9 @@ export default function CommandPalette() {
           onClick={() => setIsOpen(true)}
           className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-[#FFFFFF] hover:bg-white text-[#0F172A] border border-[#E2E8F0] shadow-lg text-xs font-semibold backdrop-blur-md cursor-pointer transition-colors group"
         >
-          <Command className="w-3.5 h-3.5 text-[#059669] group-hover:rotate-12 transition-transform" />
+          <Command className="w-3.5 h-3.5 text-neutral-900 group-hover:rotate-12 transition-transform" />
           <span>Quick Menu</span>
-          <kbd className="px-1.5 py-0.5 rounded bg-[#F1F5F9] text-[10px] font-mono text-[#64748B] border border-[#E2E8F0]">
+          <kbd className="px-1.5 py-0.5 rounded bg-neutral-100 text-[10px] font-mono text-neutral-500 border border-neutral-200">
             Ctrl K
           </kbd>
         </motion.button>
@@ -175,22 +175,22 @@ export default function CommandPalette() {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: -10 }}
               transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-              className="relative w-full max-w-lg bg-[#FFFFFF] rounded-2xl border border-[#E2E8F0] shadow-2xl overflow-hidden z-10"
+              className="relative w-full max-w-lg bg-white rounded-2xl border border-neutral-200 shadow-2xl overflow-hidden z-10"
             >
               {/* Search Input Bar */}
-              <div className="flex items-center px-4 py-3.5 border-b border-[#E2E8F0] gap-3">
-                <Search className="w-4 h-4 text-[#64748B]" />
+              <div className="flex items-center px-4 py-3.5 border-b border-neutral-200 gap-3">
+                <Search className="w-4 h-4 text-neutral-500" />
                 <input
                   type="text"
                   autoFocus
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Ketik perintah atau cari menu..."
-                  className="w-full bg-transparent text-sm text-[#0F172A] placeholder-[#64748B]/60 focus:outline-none"
+                  className="w-full bg-transparent text-sm text-neutral-900 placeholder-neutral-400 focus:outline-none"
                 />
                 <button
                   onClick={() => setIsOpen(false)}
-                  className="p-1 rounded-md text-[#64748B] hover:text-[#0F172A] hover:bg-[#F1F5F9] cursor-pointer"
+                  className="p-1 rounded-md text-neutral-500 hover:text-black hover:bg-neutral-100 cursor-pointer"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -199,7 +199,7 @@ export default function CommandPalette() {
               {/* Action List */}
               <div className="max-h-80 overflow-y-auto p-2 space-y-1">
                 {filteredActions.length === 0 ? (
-                  <div className="py-8 text-center text-xs text-[#64748B]">
+                  <div className="py-8 text-center text-xs text-neutral-500">
                     Tidak ada hasil untuk &ldquo;{search}&rdquo;
                   </div>
                 ) : (
@@ -210,22 +210,22 @@ export default function CommandPalette() {
                         key={item.id}
                         whileHover={{ x: 3 }}
                         onClick={item.action}
-                        className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-[#F8FAFC] transition-colors text-left group cursor-pointer"
+                        className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-neutral-50 transition-colors text-left group cursor-pointer"
                       >
                         <div className="flex items-center gap-3">
-                          <div className="p-1.5 rounded-lg bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0] group-hover:bg-[#059669] group-hover:text-white transition-colors">
+                          <div className="p-1.5 rounded-lg bg-neutral-100 text-neutral-900 border border-neutral-200 group-hover:bg-[#0D0D0D] group-hover:text-white transition-colors">
                             <IconComp className="w-4 h-4" />
                           </div>
                           <div>
-                            <span className="text-xs sm:text-sm font-semibold text-[#0F172A] group-hover:text-[#059669] transition-colors">
+                            <span className="text-xs sm:text-sm font-semibold text-neutral-900 group-hover:text-black transition-colors">
                               {item.title}
                             </span>
-                            <span className="block text-[11px] text-[#64748B]">
+                            <span className="block text-[11px] text-neutral-500">
                               {item.category}
                             </span>
                           </div>
                         </div>
-                        <ExternalLink className="w-3.5 h-3.5 text-[#64748B]/60 group-hover:text-[#059669] transition-transform" />
+                        <ExternalLink className="w-3.5 h-3.5 text-neutral-400 group-hover:text-black transition-transform" />
                       </motion.button>
                     );
                   })
