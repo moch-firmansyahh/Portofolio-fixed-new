@@ -6,25 +6,24 @@ import { PERSONAL_INFO } from "@/data/portfolioData";
 
 export default function Preloader() {
   const [progress, setProgress] = useState(0);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     // Check if preloader already ran in this browsing session
     const hasLoaded = sessionStorage.getItem("firman_portfolio_loaded");
 
     if (hasLoaded) {
-      // Navigated back from /projects/[id] -> skip preloader completely
+      // Navigated back from /projects/[id] -> skip preloader instantly
       setIsLoading(false);
       document.body.style.overflow = "unset";
       return;
     }
 
-    // First visit or initial page load
-    setIsLoading(true);
+    // First visit or initial page load -> lock scroll immediately
     document.body.style.overflow = "hidden";
 
-    // 60fps/120fps display refresh synchronized progress (~2.6s loading)
-    const totalDuration = 2600;
+    // 60fps/120fps display refresh synchronized progress (~2.4s loading)
+    const totalDuration = 2400;
     let startTime: number | null = null;
     let animationFrameId: number;
 
