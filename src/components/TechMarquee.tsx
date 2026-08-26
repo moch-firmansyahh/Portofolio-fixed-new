@@ -28,7 +28,7 @@ export default function TechMarquee() {
       <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-[#F8F9FA] to-transparent z-10 pointer-events-none" />
 
       <motion.div
-        className="flex whitespace-nowrap gap-8 items-center"
+        className="flex whitespace-nowrap gap-8 items-center will-change-transform transform-gpu"
         animate={{
           x: ["0%", "-50%"],
         }}
@@ -37,7 +37,6 @@ export default function TechMarquee() {
           ease: "linear",
           duration: 26,
         }}
-        whileHover={{ animationPlayState: "paused" }}
       >
         {[...MARQUEE_ITEMS, ...MARQUEE_ITEMS].map((item, index) => (
           <div

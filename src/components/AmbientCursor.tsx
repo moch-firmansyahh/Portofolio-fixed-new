@@ -7,11 +7,11 @@ export default function AmbientCursor() {
   const [isVisible, setIsVisible] = useState(false);
 
   // Raw mouse coordinates
-  const mouseX = useMotionValue(-100);
-  const mouseY = useMotionValue(-100);
+  const mouseX = useMotionValue(-200);
+  const mouseY = useMotionValue(-200);
 
-  // Soft atmospheric glow spring
-  const springGlowConfig = { damping: 30, stiffness: 120, mass: 1 };
+  // Soft atmospheric glow spring - lightweight damping
+  const springGlowConfig = { damping: 28, stiffness: 140, mass: 0.8 };
   const glowX = useSpring(mouseX, springGlowConfig);
   const glowY = useSpring(mouseY, springGlowConfig);
 
@@ -31,7 +31,7 @@ export default function AmbientCursor() {
     const handleMouseLeave = () => setIsVisible(false);
     const handleMouseEnter = () => setIsVisible(true);
 
-    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mousemove", handleMouseMove, { passive: true });
     document.addEventListener("mouseleave", handleMouseLeave);
     document.addEventListener("mouseenter", handleMouseEnter);
 
@@ -45,17 +45,16 @@ export default function AmbientCursor() {
   if (!isVisible) return null;
 
   return (
-    <>
-      {/* Atmospheric Background Glow Orb */}
-      <motion.div
-        style={{
-          x: glowX,
-          y: glowY,
-          translateX: "-50%",
-          translateY: "-50%",
-        }}
-        className="fixed top-0 left-0 w-80 h-80 bg-neutral-900/4 rounded-full blur-3xl pointer-events-none z-30"
-      />
-    </>
+    <motion.div
+      style={{
+        x: glowX,
+        y: glowY,
+        translateX: "-50%",
+        translateY: "-50%",
+        background:
+          "radial-gradient(circle, rgba(15, 23, 42, 0.04) 0%, rgba(15, 23, 42, 0.015) 45%, transparent 70%)",
+      }}
+      className="fixed top-0 left-0 w-80 h-80 rounded-full pointer-events-none z-30 will-change-transform"
+    />
   );
 }

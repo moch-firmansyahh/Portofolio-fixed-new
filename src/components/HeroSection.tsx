@@ -1,11 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { ArrowDown, ArrowUpRight } from "lucide-react";
 import { PERSONAL_INFO } from "@/data/portfolioData";
-import Magnetic from "./Magnetic";
 
 const TYPEWRITER_PHRASES = [
   "Moch. Firmansyah",
@@ -14,14 +13,8 @@ const TYPEWRITER_PHRASES = [
   "Informatics Student",
 ];
 
-export default function HeroSection() {
-  const heroRef = useRef<HTMLDivElement>(null);
-  const titleLine1Ref = useRef<HTMLHeadingElement>(null);
-  const titleLine2Ref = useRef<HTMLHeadingElement>(null);
-  const subheadlineRef = useRef<HTMLDivElement>(null);
-  const ctaGroupRef = useRef<HTMLDivElement>(null);
-
-  // Typewriter Loop (Type -> Pause -> Delete -> Next phrase)
+// Isolated Typewriter Subcomponent to prevent parent HeroSection re-renders
+function TypewriterText() {
   const [phraseIndex, setPhraseIndex] = useState(0);
   const [displayText, setDisplayText] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
@@ -34,7 +27,6 @@ export default function HeroSection() {
       if (!isDeleting) {
         setDisplayText(currentPhrase.substring(0, displayText.length + 1));
         if (displayText === currentPhrase) {
-          // Pause at full word before deleting
           setTimeout(() => setIsDeleting(true), 2000);
         }
       } else {
@@ -49,58 +41,66 @@ export default function HeroSection() {
     return () => clearTimeout(timer);
   }, [displayText, isDeleting, phraseIndex]);
 
-  // Parallax on scroll
+  return (
+    <span className="font-bold text-neutral-900 inline-block">
+      {displayText}
+      <span className="inline-block w-0.5 h-6 bg-neutral-900 ml-1 align-middle animate-pulse" />
+    </span>
+  );
+}
+
+export default function HeroSection() {
+  const heroRef = useRef<HTMLDivElement>(null);
+  const titleLine1Ref = useRef<HTMLHeadingElement>(null);
+  const titleLine2Ref = useRef<HTMLHeadingElement>(null);
+  const subheadlineRef = useRef<HTMLDivElement>(null);
+  const ctaGroupRef = useRef<HTMLDivElement>(null);
+
+  // Parallax on scroll - lightweight transforms
   const { scrollYProgress } = useScroll({
     target: heroRef,
     offset: ["start start", "end start"],
   });
 
-  const heroY = useTransform(scrollYProgress, [0, 1], [0, 90]);
-  const heroOpacity = useTransform(scrollYProgress, [0, 0.75], [1, 0.2]);
-  const orb1Y = useTransform(scrollYProgress, [0, 1], [0, -70]);
-  const orb2Y = useTransform(scrollYProgress, [0, 1], [0, 100]);
+  const heroY = useTransform(scrollYProgress, [0, 1], [0, 80]);
+  const heroOpacity = useTransform(scrollYProgress, [0, 0.8], [1, 0.2]);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      const tl = gsap.timeline({ defaults: { ease: "power4.out" } });
+      const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
 
       tl.from(titleLine1Ref.current, {
         opacity: 0,
-        y: 50,
-        filter: "blur(10px)",
-        skewY: 1.5,
-        duration: 1.1,
+        y: 40,
+        duration: 0.9,
         delay: 0.1,
       })
         .from(
           titleLine2Ref.current,
           {
             opacity: 0,
-            y: 50,
-            filter: "blur(10px)",
-            skewY: 1.5,
-            duration: 1.1,
-          },
-          "-=0.85"
-        )
-        .from(
-          subheadlineRef.current,
-          {
-            opacity: 0,
-            y: 25,
-            filter: "blur(6px)",
+            y: 40,
             duration: 0.9,
           },
           "-=0.7"
         )
         .from(
-          ctaGroupRef.current,
+          subheadlineRef.current,
           {
             opacity: 0,
             y: 20,
             duration: 0.8,
           },
           "-=0.6"
+        )
+        .from(
+          ctaGroupRef.current,
+          {
+            opacity: 0,
+            y: 15,
+            duration: 0.7,
+          },
+          "-=0.5"
         );
     }, heroRef);
 
@@ -128,37 +128,18 @@ export default function HeroSection() {
       ref={heroRef}
       className="relative min-h-[88vh] flex flex-col justify-center pt-32 pb-20 md:pt-40 md:pb-28 overflow-hidden"
     >
-      {/* Floating Parallax Ambient Background Orbs */}
-      <motion.div
-        style={{ y: orb1Y }}
-        animate={{
-          scale: [1, 1.15, 1],
-          x: [0, 20, 0],
+      {/* Lightweight GPU-accelerated Background Glow without heavy filter blur */}
+      <div
+        style={{
+          background:
+            "radial-gradient(circle, rgba(238, 242, 246, 0.8) 0%, rgba(248, 250, 252, 0.4) 50%, transparent 70%)",
         }}
-        transition={{
-          duration: 12,
-          repeat: Infinity,
-          ease: "easeInOut",
-        }}
-        className="absolute top-1/4 left-1/3 w-[450px] md:w-[700px] h-[350px] md:h-[480px] bg-gradient-to-tr from-[#EEF2F6] via-[#F8FAFC] to-[#F1F5F9] rounded-full blur-3xl -z-10 opacity-80 pointer-events-none"
-      />
-      <motion.div
-        style={{ y: orb2Y }}
-        animate={{
-          scale: [1.1, 1, 1.1],
-          x: [0, -25, 0],
-        }}
-        transition={{
-          duration: 14,
-          repeat: Infinity,
-          ease: "easeInOut",
-        }}
-        className="absolute bottom-1/4 right-1/4 w-[350px] md:w-[520px] h-[300px] md:h-[420px] bg-neutral-900/3 rounded-full blur-3xl -z-10 pointer-events-none"
+        className="absolute top-1/4 left-1/3 w-[500px] md:w-[700px] h-[350px] md:h-[450px] rounded-full -z-10 pointer-events-none"
       />
 
       <motion.div
         style={{ y: heroY, opacity: heroOpacity }}
-        className="max-w-[1200px] w-full mx-auto px-6 md:px-12 flex flex-col items-start"
+        className="max-w-[1200px] w-full mx-auto px-6 md:px-12 flex flex-col items-start will-change-transform"
       >
         {/* Hero Title */}
         <div className="space-y-1 md:space-y-2 mb-8">
@@ -187,24 +168,21 @@ export default function HeroSection() {
           </h1>
         </div>
 
-        {/* Subheadline with Seamless Inline Typewriter Loop */}
+        {/* Subheadline with Isolated Typewriter Loop */}
         <div
           ref={subheadlineRef}
           className="max-w-2xl text-lg sm:text-xl md:text-2xl text-neutral-600 font-normal leading-relaxed mb-10 tracking-tight"
         >
           <div className="text-xl sm:text-2xl md:text-3xl font-normal text-neutral-800 mb-2">
             <span>Hi, I am </span>
-            <span className="font-bold text-neutral-900 inline-block">
-              {displayText}
-              <span className="inline-block w-0.5 h-6 bg-neutral-900 ml-1 align-middle animate-pulse" />
-            </span>
+            <TypewriterText />
           </div>
           <p className="text-base sm:text-lg text-neutral-600 font-normal leading-relaxed">
             {PERSONAL_INFO.tagline}
           </p>
         </div>
 
-        {/* CTA Buttons Group - Calm & Subtle Hover */}
+        {/* CTA Buttons Group */}
         <div
           ref={ctaGroupRef}
           className="flex flex-wrap items-center gap-4 w-full sm:w-auto"
