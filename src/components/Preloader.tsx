@@ -9,21 +9,11 @@ export default function Preloader() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check if preloader already ran in this browsing session
-    const hasLoaded = sessionStorage.getItem("firman_portfolio_loaded");
-
-    if (hasLoaded) {
-      // Navigated back from /projects/[id] -> skip preloader instantly
-      setIsLoading(false);
-      document.body.style.overflow = "unset";
-      return;
-    }
-
-    // First visit or initial page load -> lock scroll immediately
+    // Lock scroll during preloader
     document.body.style.overflow = "hidden";
 
-    // 60fps/120fps display refresh synchronized progress (~2.4s loading)
-    const totalDuration = 2400;
+    // 60fps/120fps display refresh synchronized progress (~2.2s loading)
+    const totalDuration = 2200;
     let startTime: number | null = null;
     let animationFrameId: number;
 
@@ -41,8 +31,7 @@ export default function Preloader() {
       if (progressRatio < 1) {
         animationFrameId = requestAnimationFrame(updateProgress);
       } else {
-        // Mark session as loaded and unblock scroll immediately at 100%
-        sessionStorage.setItem("firman_portfolio_loaded", "true");
+        // Unblock scroll immediately at 100% and dismiss preloader
         document.body.style.overflow = "unset";
         setIsLoading(false);
       }
@@ -65,7 +54,7 @@ export default function Preloader() {
           exit={{
             y: "-100%",
             transition: {
-              duration: 1.2, // Slower, buttery-smooth curtain lift
+              duration: 1.1, // Slower, buttery-smooth curtain lift
               ease: [0.76, 0, 0.24, 1], // Award-winning custom cubic bezier
             },
           }}
