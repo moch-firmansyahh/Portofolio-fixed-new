@@ -1,5 +1,4 @@
-import { collection, doc, getDoc, getDocs, addDoc, orderBy, query, serverTimestamp } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { supabase } from "@/lib/supabase";
 import { 
   PROJECTS as STATIC_PROJECTS, 
   Project, 
@@ -10,7 +9,8 @@ import {
   ExperienceItem
 } from "@/data/portfolioData";
 
-export interface FirestoreProjectRaw {
+export interface SupabaseProjectRaw {
+  id?: string;
   title?: string;
   subtitle?: string;
   description?: string;
@@ -36,8 +36,9 @@ export interface ContactMessagePayload {
   message: string;
 }
 
-// Timeout helper to avoid infinite hanging when network or Firebase is blocked
-function withTimeout<T>(promise: Promise<T>, timeoutMs = 4000): Promise<T> {
+// Timeout helper to avoid infinite hanging when network is slow
+function withTimeout<T>(promiseLike: PromiseLike<T>, timeoutMs = 4000): Promise<T> {
+  const promise = Promise.resolve(promiseLike);
   let timer: NodeJS.Timeout;
   const timeoutPromise = new Promise<T>((_, reject) => {
     timer = setTimeout(() => reject(new Error(`Timeout after ${timeoutMs}ms`)), timeoutMs);
@@ -65,7 +66,7 @@ export function slugify(text: string): string {
 }
 
 // Clean and sanitize project payload to prevent undefined runtime errors
-export function sanitizeProject(data: FirestoreProjectRaw, docId: string): Project {
+export function sanitizeProject(data: SupabaseProjectRaw, docId: string): Project {
   const title = (data.title && typeof data.title === "string" && data.title.trim()) 
     ? data.title.trim() 
     : "Untitled Project";
@@ -77,7 +78,12 @@ export function sanitizeProject(data: FirestoreProjectRaw, docId: string): Proje
   if (Array.isArray(data.tags)) {
     tags = data.tags.filter((t) => typeof t === "string" && t.trim().length > 0).map((t) => t.trim());
   } else if (typeof data.tags === "string" && data.tags.trim()) {
-    tags = data.tags.split(",").map((t) => t.trim()).filter(Boolean);
+    try {
+      const parsed = JSON.parse(data.tags);
+      if (Array.isArray(parsed)) tags = parsed;
+    } catch {
+      tags = data.tags.split(",").map((t) => t.trim()).filter(Boolean);
+    }
   }
   if (tags.length === 0) {
     tags = ["Web Development", "Modern UI"];
@@ -88,7 +94,12 @@ export function sanitizeProject(data: FirestoreProjectRaw, docId: string): Proje
   if (Array.isArray(data.highlights)) {
     highlights = data.highlights.filter((h) => typeof h === "string" && h.trim().length > 0).map((h) => h.trim());
   } else if (typeof data.highlights === "string" && data.highlights.trim()) {
-    highlights = data.highlights.split("\n").map((h) => h.trim()).filter(Boolean);
+    try {
+      const parsed = JSON.parse(data.highlights);
+      if (Array.isArray(parsed)) highlights = parsed;
+    } catch {
+      highlights = data.highlights.split("\n").map((h) => h.trim()).filter(Boolean);
+    }
   }
   if (highlights.length === 0) {
     highlights = [
@@ -141,27 +152,23 @@ let cachedProfile: typeof STATIC_PERSONAL_INFO | null = null;
 let cachedExperiences: ExperienceItem[] | null = null;
 
 /**
- * 🛡️ 3-TIER ERROR-SAFE PROJECT FETCHER
+ * 🛡️ 3-TIER ERROR-SAFE PROJECT FETCHER (Supabase -> Cached -> Static)
  */
 export async function getProjects(): Promise<Project[]> {
   try {
-    const q = query(collection(db, "projects"), orderBy("createdAt", "desc"));
-    const querySnapshot = await withTimeout(getDocs(q), 3500);
+    const { data: rows, error } = await withTimeout(
+      supabase.from("projects").select("*").order("createdAt", { ascending: false })
+    );
 
-    if (!querySnapshot.empty) {
-      const projects: Project[] = [];
-      querySnapshot.forEach((docSnap) => {
-        const data = docSnap.data() as FirestoreProjectRaw;
-        projects.push(sanitizeProject(data, docSnap.id));
-      });
-
+    if (!error && rows && rows.length > 0) {
+      const projects: Project[] = rows.map((row: any) => sanitizeProject(row, row.id));
       if (projects.length > 0) {
         cachedProjects = projects;
         return projects;
       }
     }
   } catch (error) {
-    console.warn("⚠️ Firestore Live projects fetch fallback:", error);
+    console.warn("⚠️ Supabase Live projects fetch fallback:", error);
   }
 
   if (cachedProjects && cachedProjects.length > 0) {
@@ -172,7 +179,7 @@ export async function getProjects(): Promise<Project[]> {
 }
 
 /**
- * 🛡️ SINGLE PROJECT LOOKUP BY SLUG OR FIRESTORE ID
+ * 🛡️ SINGLE PROJECT LOOKUP BY SLUG OR ID
  */
 export async function getProjectById(idOrSlug: string): Promise<Project | null> {
   const normalizedSearch = idOrSlug.toLowerCase().trim();
@@ -204,14 +211,15 @@ export async function getProjectById(idOrSlug: string): Promise<Project | null> 
  */
 export async function getSkillCategories(): Promise<SkillCategory[]> {
   try {
-    const querySnapshot = await withTimeout(getDocs(collection(db, "skills")), 3500);
+    const { data: rows, error } = await withTimeout(
+      supabase.from("skills").select("*").order("name")
+    );
 
-    if (!querySnapshot.empty) {
-      const dynamicSkills = querySnapshot.docs.map((d) => {
-        const data = d.data();
-        const percentNum = typeof data.percent === "number" ? data.percent : parseInt(data.percent || "80", 10);
+    if (!error && rows && rows.length > 0) {
+      const dynamicSkills = rows.map((d: any) => {
+        const percentNum = typeof d.percent === "number" ? d.percent : parseInt(d.percent || "80", 10);
         return {
-          name: data.name || "Skill",
+          name: d.name || "Skill",
           level: !isNaN(percentNum) ? `${percentNum}%` : "80%",
           highlight: percentNum >= 75,
         };
@@ -231,7 +239,7 @@ export async function getSkillCategories(): Promise<SkillCategory[]> {
       }
     }
   } catch (error) {
-    console.warn("⚠️ Firestore Live skills fetch fallback:", error);
+    console.warn("⚠️ Supabase Live skills fetch fallback:", error);
   }
 
   if (cachedSkills && cachedSkills.length > 0) {
@@ -246,13 +254,15 @@ export async function getSkillCategories(): Promise<SkillCategory[]> {
  */
 export async function getProfile(): Promise<typeof STATIC_PERSONAL_INFO> {
   try {
-    const docSnap = await withTimeout(getDoc(doc(db, "profile", "main")), 3500);
-    if (docSnap.exists()) {
-      const data = docSnap.data();
+    const { data, error } = await withTimeout(
+      supabase.from("profile").select("*").eq("id", "main").maybeSingle()
+    );
+
+    if (!error && data) {
       const profile = {
         name: data.name || STATIC_PERSONAL_INFO.name,
         shortName: data.shortName || STATIC_PERSONAL_INFO.shortName,
-        role: data.role || STATIC_PERSONAL_INFO.role,
+        role: data.role || data.title || STATIC_PERSONAL_INFO.role,
         tagline: data.tagline || STATIC_PERSONAL_INFO.tagline,
         bio: data.bio || STATIC_PERSONAL_INFO.bio,
         status: data.status || STATIC_PERSONAL_INFO.status,
@@ -261,10 +271,10 @@ export async function getProfile(): Promise<typeof STATIC_PERSONAL_INFO> {
         phone: data.phone || STATIC_PERSONAL_INFO.phone,
         resumeUrl: data.resumeUrl || STATIC_PERSONAL_INFO.resumeUrl,
         socialLinks: {
-          github: data.socialLinks?.github || STATIC_PERSONAL_INFO.socialLinks.github,
-          linkedin: data.socialLinks?.linkedin || STATIC_PERSONAL_INFO.socialLinks.linkedin,
-          instagram: data.socialLinks?.instagram || STATIC_PERSONAL_INFO.socialLinks.instagram,
-          tiktok: data.socialLinks?.tiktok || STATIC_PERSONAL_INFO.socialLinks.tiktok,
+          github: data.github || data.socialLinks?.github || STATIC_PERSONAL_INFO.socialLinks.github,
+          linkedin: data.linkedin || data.socialLinks?.linkedin || STATIC_PERSONAL_INFO.socialLinks.linkedin,
+          instagram: data.instagram || data.socialLinks?.instagram || STATIC_PERSONAL_INFO.socialLinks.instagram,
+          tiktok: data.tiktok || data.socialLinks?.tiktok || STATIC_PERSONAL_INFO.socialLinks.tiktok,
         },
         stats: Array.isArray(data.stats) && data.stats.length > 0 ? data.stats : STATIC_PERSONAL_INFO.stats,
       };
@@ -272,7 +282,7 @@ export async function getProfile(): Promise<typeof STATIC_PERSONAL_INFO> {
       return profile;
     }
   } catch (error) {
-    console.warn("⚠️ Firestore Live profile fetch fallback:", error);
+    console.warn("⚠️ Supabase Live profile fetch fallback:", error);
   }
 
   if (cachedProfile) {
@@ -287,17 +297,22 @@ export async function getProfile(): Promise<typeof STATIC_PERSONAL_INFO> {
  */
 export async function getExperiences(): Promise<ExperienceItem[]> {
   try {
-    const q = query(collection(db, "experiences"), orderBy("createdAt", "desc"));
-    const querySnapshot = await withTimeout(getDocs(q), 3500);
+    const { data: rows, error } = await withTimeout(
+      supabase.from("experiences").select("*").order("createdAt", { ascending: false })
+    );
 
-    if (!querySnapshot.empty) {
-      const items: ExperienceItem[] = querySnapshot.docs.map((d) => {
-        const data = d.data();
+    if (!error && rows && rows.length > 0) {
+      const items: ExperienceItem[] = rows.map((data: any) => {
         let techs: string[] = [];
         if (Array.isArray(data.technologies)) {
           techs = data.technologies;
         } else if (typeof data.technologies === "string") {
-          techs = data.technologies.split(",").map((s: string) => s.trim()).filter(Boolean);
+          try {
+            const parsed = JSON.parse(data.technologies);
+            if (Array.isArray(parsed)) techs = parsed;
+          } catch {
+            techs = data.technologies.split(",").map((s: string) => s.trim()).filter(Boolean);
+          }
         }
 
         return {
@@ -317,7 +332,7 @@ export async function getExperiences(): Promise<ExperienceItem[]> {
       }
     }
   } catch (error) {
-    console.warn("⚠️ Firestore Live experiences fetch fallback:", error);
+    console.warn("⚠️ Supabase Live experiences fetch fallback:", error);
   }
 
   if (cachedExperiences && cachedExperiences.length > 0) {
@@ -336,18 +351,22 @@ export async function sendMessage(payload: ContactMessagePayload): Promise<{ suc
       throw new Error("Nama, email, dan pesan wajib diisi.");
     }
 
-    const docRef = await addDoc(collection(db, "messages"), {
-      name: payload.name.trim(),
-      email: payload.email.trim(),
-      subject: payload.subject?.trim() || "Pesan Baru dari Website Portofolio",
-      message: payload.message.trim(),
-      read: false,
-      createdAt: serverTimestamp(),
-    });
+    const { data, error } = await supabase.from("messages").insert([
+      {
+        name: payload.name.trim(),
+        email: payload.email.trim(),
+        message: payload.message.trim(),
+        status: "unread",
+      },
+    ]).select("id").single();
 
-    return { success: true, id: docRef.id };
+    if (error) {
+      throw error;
+    }
+
+    return { success: true, id: data?.id };
   } catch (err: any) {
-    console.error("Failed to send message:", err);
+    console.error("Failed to send message via Supabase:", err);
     return { success: false, error: err.message || "Gagal mengirim pesan." };
   }
 }
