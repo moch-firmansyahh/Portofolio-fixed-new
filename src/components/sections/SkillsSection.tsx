@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence, type Variants } from "framer-motion";
 import {
   Terminal,
@@ -22,8 +22,11 @@ import {
   CheckCircle2,
   Send,
   Sparkles,
+  Server,
 } from "lucide-react";
-import { SKILL_CATEGORIES } from "@/data/portfolioData";
+import { SKILL_CATEGORIES as STATIC_SKILL_CATEGORIES } from "@/data/portfolioData";
+import { getSkillCategories } from "@/services/portfolio";
+import type { SkillCategory } from "@/types/skill";
 
 function GoogleLogo({ className = "w-5 h-5" }: { className?: string }) {
   return (
@@ -70,13 +73,39 @@ function getSkillIcon(name: string, isCert = false) {
   if (n.includes("problem-solving") || n.includes("troubleshooting")) return <Wrench className="w-5 h-5" />;
   if (n.includes("analytical")) return <Cpu className="w-5 h-5" />;
   if (n.includes("client")) return <Briefcase className="w-5 h-5" />;
+  if (n.includes("backend") || n.includes("server") || n.includes("node") || n.includes("express"))
+    return <Server className="w-5 h-5" />;
   if (n.includes("certificate") || n.includes("training") || n.includes("dicoding"))
     return <Award className="w-5 h-5" />;
   return <Code2 className="w-5 h-5" />;
 }
 
 export default function SkillsSection() {
+  const [categories, setCategories] = useState<SkillCategory[]>(STATIC_SKILL_CATEGORIES);
   const [activeTab, setActiveTab] = useState(0);
+
+  useEffect(() => {
+    let isMounted = true;
+    async function loadLiveSkillCategories() {
+      try {
+        const live = await getSkillCategories();
+        if (isMounted && live && live.length > 0) {
+          setCategories(live);
+        }
+      } catch (err) {
+        console.warn("Using default skill categories:", err);
+      }
+    }
+    loadLiveSkillCategories();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const currentCategory = categories[activeTab] || categories[0];
+  const isCertTab =
+    Boolean(currentCategory?.title.toLowerCase().includes("certification")) ||
+    Boolean(currentCategory?.title.toLowerCase().includes("achievement"));
 
   const containerVariants: Variants = {
     hidden: { opacity: 0 },
@@ -116,7 +145,7 @@ export default function SkillsSection() {
 
         {/* Category Tabs with Animated Sliding Pill Indicator */}
         <div className="flex flex-wrap justify-center gap-2 mb-10">
-          {SKILL_CATEGORIES.map((category, index) => {
+          {categories.map((category, index) => {
             const isActive = activeTab === index;
             return (
               <button
@@ -144,27 +173,27 @@ export default function SkillsSection() {
         {/* Skills Grid with Animated Entrance & Minimalist Editorial Cards */}
         <AnimatePresence mode="wait">
           <motion.div
-            key={`grid-${activeTab}`}
+            key={`grid-${activeTab}-${currentCategory?.title}`}
             variants={containerVariants}
             initial="hidden"
             animate="visible"
             exit={{ opacity: 0, y: -10 }}
             className={`grid gap-4 md:gap-5 ${
-              activeTab === 4
+              isCertTab
                 ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
                 : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
             }`}
           >
-            {SKILL_CATEGORIES[activeTab].skills.map((skill, sIdx) => {
-              const isCertTab = activeTab === 4;
-              const percentValue =
-                skill.level === "Expert"
-                  ? "95%"
-                  : skill.level === "Advanced"
-                  ? "85%"
-                  : skill.level === "Proficient"
-                  ? "75%"
-                  : "100%";
+            {currentCategory?.skills?.map((skill, sIdx) => {
+              const percentValue = skill.percent
+                ? `${skill.percent}%`
+                : skill.level === "Expert"
+                ? "95%"
+                : skill.level === "Advanced"
+                ? "85%"
+                : skill.level === "Proficient"
+                ? "75%"
+                : "100%";
 
               return (
                 <motion.div

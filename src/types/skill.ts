@@ -1,6 +1,9 @@
 export interface Skill {
+  id?: string;
   name: string;
   level?: "Core" | "Proficient" | "Advanced" | "Expert" | string;
+  percent?: number | string;
+  logo?: string;
   highlight?: boolean;
   issuer?: string;
   issueDate?: string;

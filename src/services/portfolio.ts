@@ -32,9 +32,12 @@ interface DbProjectRow {
 }
 
 interface DbSkillRow {
+  id?: string | number;
   name: string;
   category?: string;
   level?: string;
+  percent?: number | string;
+  logo?: string;
   highlight?: boolean;
   issuer?: string;
   issue_date?: string;
@@ -179,9 +182,12 @@ export async function getSkillCategories(): Promise<SkillCategory[]> {
         categoryMap.set(cat, []);
       }
       categoryMap.get(cat)!.push({
+        id: row.id ? String(row.id) : undefined,
         name: row.name,
         category: cat,
         level: row.level || "Proficient",
+        percent: row.percent,
+        logo: row.logo,
         highlight: Boolean(row.highlight),
         issuer: row.issuer,
         issueDate: row.issue_date || row.issueDate,
@@ -189,7 +195,24 @@ export async function getSkillCategories(): Promise<SkillCategory[]> {
       });
     });
 
+    // Urutan standar agar tab utama tetap rapi di awal, diikuti kategori baru dari admin
+    const predefinedOrder = [
+      "Front-End Web Development",
+      "Programming Languages",
+      "Developer Tools",
+      "Soft Skills & Professional",
+      "Achievements & Certifications",
+    ];
+
     const result: SkillCategory[] = [];
+    predefinedOrder.forEach((title) => {
+      if (categoryMap.has(title)) {
+        result.push({ title, skills: categoryMap.get(title)! });
+        categoryMap.delete(title);
+      }
+    });
+
+    // Kategori kustom baru yang ditambahkan dari admin (seperti "Backend")
     categoryMap.forEach((skills, title) => {
       result.push({ title, skills });
     });
