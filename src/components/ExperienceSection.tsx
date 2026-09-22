@@ -1,13 +1,31 @@
 "use client";
 
-import { useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { MapPin } from "lucide-react";
-import { EXPERIENCES } from "@/data/portfolioData";
+import { EXPERIENCES as DEFAULT_EXPERIENCES, ExperienceItem } from "@/data/portfolioData";
+import { getExperiences } from "@/services/portfolioService";
 import ScrollReveal from "./ScrollReveal";
 
 export default function ExperienceSection() {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [experiences, setExperiences] = useState<ExperienceItem[]>(DEFAULT_EXPERIENCES);
+
+  useEffect(() => {
+    let isMounted = true;
+    async function loadExperiences() {
+      try {
+        const liveExps = await getExperiences();
+        if (isMounted && liveExps && liveExps.length > 0) {
+          setExperiences(liveExps);
+        }
+      } catch (_) {}
+    }
+    loadExperiences();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   // Scroll-linked progress line
   const { scrollYProgress } = useScroll({
@@ -38,7 +56,7 @@ export default function ExperienceSection() {
             className="absolute top-0 left-4 md:left-1/2 -translate-x-px w-0.5 bg-neutral-900 z-0 origin-top shadow-xs"
           />
 
-          {EXPERIENCES.map((exp, index) => {
+          {experiences.map((exp, index) => {
             const isEven = index % 2 === 0;
             return (
               <div
@@ -92,16 +110,18 @@ export default function ExperienceSection() {
                       </p>
 
                       {/* Tech Used */}
-                      <div className="flex flex-wrap gap-1.5 pt-3 border-t border-[#E2E8F0]">
-                        {exp.technologies.map((tech) => (
-                          <span
-                            key={tech}
-                            className="px-2.5 py-0.5 rounded-md bg-[#F1F5F9] text-[11px] font-medium text-[#0F172A]"
-                          >
-                            {tech}
-                          </span>
-                        ))}
-                      </div>
+                      {exp.technologies && exp.technologies.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5 pt-3 border-t border-[#E2E8F0]">
+                          {exp.technologies.map((tech) => (
+                            <span
+                              key={tech}
+                              className="px-2.5 py-0.5 rounded-md bg-[#F1F5F9] text-[11px] font-medium text-[#0F172A]"
+                            >
+                              {tech}
+                            </span>
+                          ))}
+                        </div>
+                      )}
                     </motion.div>
                   </ScrollReveal>
                 </div>

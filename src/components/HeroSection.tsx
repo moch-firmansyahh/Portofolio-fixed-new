@@ -1,26 +1,31 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useMemo } from "react";
 import gsap from "gsap";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { ArrowDown, ArrowUpRight } from "lucide-react";
-import { PERSONAL_INFO } from "@/data/portfolioData";
+import { PERSONAL_INFO as DEFAULT_INFO } from "@/data/portfolioData";
+import { getProfile } from "@/services/portfolioService";
 
-const TYPEWRITER_PHRASES = [
+const DEFAULT_TYPEWRITER_PHRASES = [
   "Moch. Firmansyah",
   "Frontend Developer",
   "Security Enthusiast",
   "Informatics Student",
 ];
 
-// Isolated Typewriter Subcomponent to prevent parent HeroSection re-renders
-function TypewriterText() {
+// Isolated Typewriter Subcomponent
+function TypewriterText({ phrases }: { phrases: string[] }) {
   const [phraseIndex, setPhraseIndex] = useState(0);
   const [displayText, setDisplayText] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
 
+  const activeList = useMemo(() => {
+    return phrases && phrases.length > 0 ? phrases : DEFAULT_TYPEWRITER_PHRASES;
+  }, [phrases]);
+
   useEffect(() => {
-    const currentPhrase = TYPEWRITER_PHRASES[phraseIndex];
+    const currentPhrase = activeList[phraseIndex % activeList.length] || "Developer";
     const speed = isDeleting ? 30 : 70;
 
     const timer = setTimeout(() => {
@@ -33,13 +38,13 @@ function TypewriterText() {
         setDisplayText(currentPhrase.substring(0, displayText.length - 1));
         if (displayText === "") {
           setIsDeleting(false);
-          setPhraseIndex((prev) => (prev + 1) % TYPEWRITER_PHRASES.length);
+          setPhraseIndex((prev) => (prev + 1) % activeList.length);
         }
       }
     }, speed);
 
     return () => clearTimeout(timer);
-  }, [displayText, isDeleting, phraseIndex]);
+  }, [displayText, isDeleting, phraseIndex, activeList]);
 
   return (
     <span className="font-bold text-neutral-900 inline-block">
@@ -50,13 +55,32 @@ function TypewriterText() {
 }
 
 export default function HeroSection() {
+  const [profile, setProfile] = useState(DEFAULT_INFO);
   const heroRef = useRef<HTMLDivElement>(null);
   const titleLine1Ref = useRef<HTMLHeadingElement>(null);
   const titleLine2Ref = useRef<HTMLHeadingElement>(null);
   const subheadlineRef = useRef<HTMLDivElement>(null);
   const ctaGroupRef = useRef<HTMLDivElement>(null);
 
-  // Parallax on scroll - lightweight transforms
+  useEffect(() => {
+    let isMounted = true;
+    async function loadLiveProfile() {
+      try {
+        const live = await getProfile();
+        if (isMounted && live) {
+          setProfile(live);
+        }
+      } catch (err) {
+        console.warn("Using default profile:", err);
+      }
+    }
+    loadLiveProfile();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  // Parallax on scroll
   const { scrollYProgress } = useScroll({
     target: heroRef,
     offset: ["start start", "end start"],
@@ -123,12 +147,50 @@ export default function HeroSection() {
     }
   };
 
+  // Parse Title into 2 lines dynamically based on profile.role
+  const roleText = profile.role || DEFAULT_INFO.role;
+  let titlePart1 = "Frontend Developer &";
+  let titlePart2 = "Security Enthusiast.";
+
+  if (roleText.includes(" & ")) {
+    const parts = roleText.split(" & ").map((s) => s.trim()).filter(Boolean);
+    titlePart1 = `${parts[0]} &`;
+    titlePart2 = `${parts.slice(1).join(" & ")}.`;
+  } else if (roleText.includes(" and ")) {
+    const parts = roleText.split(" and ").map((s) => s.trim()).filter(Boolean);
+    titlePart1 = `${parts[0]} and`;
+    titlePart2 = `${parts.slice(1).join(" and ")}.`;
+  } else {
+    titlePart1 = roleText;
+    titlePart2 = "";
+  }
+
+  // Split titlePart2 so the last word is bound directly with the star icon in a whitespace-nowrap wrapper
+  const titlePart2Words = titlePart2 ? titlePart2.split(" ") : [];
+  const mainWords = titlePart2Words.slice(0, -1).join(" ");
+  const lastWord = titlePart2Words[titlePart2Words.length - 1] || "";
+
+  // Typewriter phrases dynamically constructed from name & individual role titles
+  const typewriterList = useMemo(() => {
+    const splitRoles = roleText.includes(" & ")
+      ? roleText.split(" & ").map((r) => r.trim()).filter(Boolean)
+      : roleText.includes(" and ")
+      ? roleText.split(" and ").map((r) => r.trim()).filter(Boolean)
+      : [roleText];
+
+    return [
+      profile.name || DEFAULT_INFO.name,
+      ...splitRoles,
+      "Informatics Student",
+    ];
+  }, [profile.name, roleText]);
+
   return (
     <section
       ref={heroRef}
       className="relative min-h-[88vh] flex flex-col justify-center pt-32 pb-20 md:pt-40 md:pb-28 overflow-hidden"
     >
-      {/* Lightweight GPU-accelerated Background Glow without heavy filter blur */}
+      {/* Background Glow */}
       <div
         style={{
           background:
@@ -147,38 +209,42 @@ export default function HeroSection() {
             ref={titleLine1Ref}
             className="text-[42px] sm:text-[58px] md:text-[80px] lg:text-[92px] font-extrabold tracking-[-0.035em] leading-[1.05] text-[#0F172A]"
           >
-            Frontend Developer &amp;
+            {titlePart1}
           </h1>
-          <h1
-            ref={titleLine2Ref}
-            className="text-[42px] sm:text-[58px] md:text-[80px] lg:text-[92px] font-extrabold tracking-[-0.035em] leading-[1.05] text-[#0F172A] flex items-center flex-wrap gap-3"
-          >
-            <span className="relative inline-block">
-              <span className="text-[#0F172A] underline decoration-neutral-300 decoration-wavy decoration-2 underline-offset-8">
-                Security Enthusiast.
-              </span>
-            </span>
-            <motion.span
-              animate={{ rotate: [0, 15, -15, 0] }}
-              transition={{ repeat: Infinity, duration: 5, ease: "easeInOut" }}
-              className="inline-block text-2xl sm:text-4xl md:text-5xl select-none text-neutral-400"
+          {titlePart2 ? (
+            <h1
+              ref={titleLine2Ref}
+              className="text-[42px] sm:text-[58px] md:text-[80px] lg:text-[92px] font-extrabold tracking-[-0.035em] leading-[1.05] text-[#0F172A]"
             >
-              ✦
-            </motion.span>
-          </h1>
+              <span className="text-[#0F172A] underline decoration-neutral-300 decoration-wavy decoration-2 underline-offset-8">
+                {mainWords ? `${mainWords} ` : ""}
+                <span className="inline-block whitespace-nowrap">
+                  <span>{lastWord}</span>
+                  <motion.span
+                    animate={{ rotate: [0, 15, -15, 0] }}
+                    transition={{ repeat: Infinity, duration: 5, ease: "easeInOut" }}
+                    className="inline-block text-2xl sm:text-4xl md:text-5xl select-none text-neutral-400 ml-2.5 sm:ml-4 align-baseline"
+                    style={{ textDecoration: "none" }}
+                  >
+                    ✦
+                  </motion.span>
+                </span>
+              </span>
+            </h1>
+          ) : null}
         </div>
 
-        {/* Subheadline with Isolated Typewriter Loop */}
+        {/* Subheadline with Dynamic Typewriter Loop */}
         <div
           ref={subheadlineRef}
           className="max-w-2xl text-lg sm:text-xl md:text-2xl text-neutral-600 font-normal leading-relaxed mb-10 tracking-tight"
         >
           <div className="text-xl sm:text-2xl md:text-3xl font-normal text-neutral-800 mb-2">
             <span>Hi, I am </span>
-            <TypewriterText />
+            <TypewriterText phrases={typewriterList} />
           </div>
           <p className="text-base sm:text-lg text-neutral-600 font-normal leading-relaxed">
-            {PERSONAL_INFO.tagline}
+            {profile.tagline || DEFAULT_INFO.tagline}
           </p>
         </div>
 

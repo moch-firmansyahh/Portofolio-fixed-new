@@ -5,7 +5,7 @@ export interface Project {
   description: string;
   longDescription: string;
   tags: string[];
-  category: "Web App" | "E-Commerce" | "Dashboard" | "Landing Page";
+  category: string;
   featured: boolean;
   image: string;
   demoUrl: string;

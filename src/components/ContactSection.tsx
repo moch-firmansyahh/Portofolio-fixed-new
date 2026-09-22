@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, type Variants } from "framer-motion";
 import {
   Mail,
@@ -10,12 +10,15 @@ import {
   Copy,
   ExternalLink,
   MessageSquare,
+  AlertCircle,
 } from "lucide-react";
 import { GithubIcon, LinkedinIcon, InstagramIcon, TiktokIcon } from "./icons";
 import confetti from "canvas-confetti";
-import { PERSONAL_INFO } from "@/data/portfolioData";
+import { PERSONAL_INFO as DEFAULT_INFO } from "@/data/portfolioData";
+import { sendMessage, getProfile } from "@/services/portfolioService";
 
 export default function ContactSection() {
+  const [profile, setProfile] = useState(DEFAULT_INFO);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -24,28 +27,64 @@ export default function ContactSection() {
   });
   const [copiedEmail, setCopiedEmail] = useState(false);
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
+  const [errorMessage, setErrorMessage] = useState("");
+
+  useEffect(() => {
+    let isMounted = true;
+    async function loadProfile() {
+      try {
+        const liveProfile = await getProfile();
+        if (isMounted && liveProfile) {
+          setProfile(liveProfile);
+        }
+      } catch (_) {}
+    }
+    loadProfile();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const handleCopyEmail = () => {
-    navigator.clipboard.writeText(PERSONAL_INFO.email);
+    navigator.clipboard.writeText(profile.email);
     setCopiedEmail(true);
     setTimeout(() => setCopiedEmail(false), 2500);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setStatus("submitting");
+    if (!formData.name.trim() || !formData.email.trim() || !formData.message.trim()) {
+      return;
+    }
 
-    // Simulate sending email / submission
-    setTimeout(() => {
-      setStatus("success");
-      confetti({
-        particleCount: 90,
-        spread: 70,
-        origin: { y: 0.8 },
-        colors: ["#0F172A", "#334155", "#64748B", "#94A3B8", "#E2E8F0"],
+    setStatus("submitting");
+    setErrorMessage("");
+
+    try {
+      const res = await sendMessage({
+        name: formData.name,
+        email: formData.email,
+        subject: formData.subject,
+        message: formData.message,
       });
-      setFormData({ name: "", email: "", subject: "", message: "" });
-    }, 1000);
+
+      if (res.success) {
+        setStatus("success");
+        confetti({
+          particleCount: 90,
+          spread: 70,
+          origin: { y: 0.8 },
+          colors: ["#0F172A", "#334155", "#64748B", "#94A3B8", "#E2E8F0"],
+        });
+        setFormData({ name: "", email: "", subject: "", message: "" });
+      } else {
+        setStatus("error");
+        setErrorMessage(res.error || "Gagal mengirim pesan.");
+      }
+    } catch (err: any) {
+      setStatus("error");
+      setErrorMessage(err.message || "Terjadi kesalahan jaringan.");
+    }
   };
 
   const containerVariants: Variants = {
@@ -110,7 +149,7 @@ export default function ContactSection() {
 
               <div className="p-3.5 rounded-2xl bg-neutral-50 border border-neutral-200 flex items-center justify-between gap-3">
                 <span className="text-xs sm:text-sm font-semibold text-neutral-900 truncate">
-                  {PERSONAL_INFO.email}
+                  {profile.email}
                 </span>
                 <motion.button
                   whileHover={{ scale: 1.05 }}
@@ -135,7 +174,7 @@ export default function ContactSection() {
 
               <div className="flex items-center gap-2 text-xs text-neutral-500">
                 <MapPin className="w-4 h-4 text-neutral-900" />
-                <span>Berdomisili di {PERSONAL_INFO.location}</span>
+                <span>Berdomisili di {profile.location}</span>
               </div>
             </motion.div>
 
@@ -153,7 +192,7 @@ export default function ContactSection() {
                 <motion.a
                   whileHover={{ scale: 1.03, y: -2 }}
                   whileTap={{ scale: 0.97 }}
-                  href={PERSONAL_INFO.socialLinks.github}
+                  href={profile.socialLinks.github}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="p-3.5 rounded-2xl bg-neutral-50 hover:bg-[#0D0D0D] border border-neutral-200 hover:border-neutral-900 flex items-center justify-between text-sm font-semibold text-neutral-900 hover:text-white transition-all group"
@@ -168,7 +207,7 @@ export default function ContactSection() {
                 <motion.a
                   whileHover={{ scale: 1.03, y: -2 }}
                   whileTap={{ scale: 0.97 }}
-                  href={PERSONAL_INFO.socialLinks.linkedin}
+                  href={profile.socialLinks.linkedin}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="p-3.5 rounded-2xl bg-neutral-50 hover:bg-[#0D0D0D] border border-neutral-200 hover:border-neutral-900 flex items-center justify-between text-sm font-semibold text-neutral-900 hover:text-white transition-all group"
@@ -183,7 +222,7 @@ export default function ContactSection() {
                 <motion.a
                   whileHover={{ scale: 1.03, y: -2 }}
                   whileTap={{ scale: 0.97 }}
-                  href={PERSONAL_INFO.socialLinks.instagram}
+                  href={profile.socialLinks.instagram}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="p-3.5 rounded-2xl bg-neutral-50 hover:bg-[#0D0D0D] border border-neutral-200 hover:border-neutral-900 flex items-center justify-between text-sm font-semibold text-neutral-900 hover:text-white transition-all group"
@@ -198,7 +237,7 @@ export default function ContactSection() {
                 <motion.a
                   whileHover={{ scale: 1.03, y: -2 }}
                   whileTap={{ scale: 0.97 }}
-                  href={PERSONAL_INFO.socialLinks.tiktok}
+                  href={profile.socialLinks.tiktok}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="p-3.5 rounded-2xl bg-neutral-50 hover:bg-[#0D0D0D] border border-neutral-200 hover:border-neutral-900 flex items-center justify-between text-sm font-semibold text-neutral-900 hover:text-white transition-all group"

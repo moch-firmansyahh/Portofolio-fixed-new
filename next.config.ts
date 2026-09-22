@@ -5,7 +5,25 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: "https",
+        hostname: "firebasestorage.googleapis.com",
+      },
+      {
+        protocol: "https",
         hostname: "images.unsplash.com",
+      },
+      {
+        protocol: "https",
+        hostname: "opengraph.githubassets.com",
+      },
+      {
+        protocol: "http",
+        hostname: "localhost",
+        port: "3002",
+      },
+      {
+        protocol: "http",
+        hostname: "127.0.0.1",
+        port: "3002",
       },
     ],
   },

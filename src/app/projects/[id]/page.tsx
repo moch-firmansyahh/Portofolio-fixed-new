@@ -1,24 +1,22 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowLeft, ExternalLink, ArrowUpRight, Calendar, CheckCircle2, Layers, Globe, Code2 } from "lucide-react";
+import { ArrowLeft, ExternalLink, ArrowUpRight, CheckCircle2, Layers, Globe, Code2 } from "lucide-react";
 import { GithubIcon } from "@/components/icons";
-import { PROJECTS } from "@/data/portfolioData";
+import { getProjectById, getProjects } from "@/services/portfolioService";
 import type { Metadata } from "next";
+
+export const dynamic = "force-dynamic";
+export const dynamicParams = true;
+export const revalidate = 0;
 
 interface Props {
   params: Promise<{ id: string }>;
 }
 
-export async function generateStaticParams() {
-  return PROJECTS.map((project) => ({
-    id: project.id,
-  }));
-}
-
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
-  const project = PROJECTS.find((p) => p.id === id);
+  const project = await getProjectById(id);
 
   if (!project) {
     return {
@@ -27,22 +25,22 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   return {
-    title: `${project.title} — Case Study | Moch. Firmansyah`,
+    title: `${project.title} - Case Study | Moch. Firmansyah`,
     description: project.description,
   };
 }
 
 export default async function ProjectDetailPage({ params }: Props) {
   const { id } = await params;
-  const projectIndex = PROJECTS.findIndex((p) => p.id === id);
-  const project = PROJECTS[projectIndex];
+  const project = await getProjectById(id);
 
   if (!project) {
     notFound();
   }
 
-  // Filter other projects
-  const otherProjects = PROJECTS.filter((p) => p.id !== id);
+  // Fetch all projects for other projects section
+  const allProjects = await getProjects();
+  const otherProjects = allProjects.filter((p) => p.id !== id && p.id !== project.id);
 
   return (
     <div className="min-h-screen bg-[#F8F9FA] bg-grain-texture text-[#0F172A] py-12 md:py-20 px-6 md:px-12 selection:bg-neutral-900 selection:text-white">
@@ -59,67 +57,74 @@ export default async function ProjectDetailPage({ params }: Props) {
         </div>
 
         {/* Project Hero Header */}
-        <div className="space-y-6">
-          <div className="space-y-3">
-            <h1 className="text-3xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-neutral-900 leading-tight">
+        <div className="space-y-6 min-w-0">
+          <div className="space-y-3 min-w-0">
+            <h1 className="text-3xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-neutral-900 leading-tight break-words [overflow-wrap:anywhere]">
               {project.title}
             </h1>
-            <p className="text-lg sm:text-xl text-neutral-600 font-medium leading-relaxed max-w-2xl">
-              {project.subtitle}
-            </p>
+            {project.subtitle && (
+              <p className="text-lg sm:text-xl text-neutral-600 font-medium leading-relaxed max-w-2xl break-words [overflow-wrap:anywhere]">
+                {project.subtitle}
+              </p>
+            )}
           </div>
 
           {/* Action CTAs */}
           <div className="flex flex-wrap items-center gap-3 pt-2">
-            <a
-              href={project.demoUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[#0D0D0D] hover:bg-neutral-800 text-white font-semibold text-sm transition-all shadow-xs hover:shadow-md hover:-translate-y-0.5 active:translate-y-0"
-            >
-              <span>Kunjungi Website Live</span>
-              <ExternalLink className="w-4 h-4" />
-            </a>
+            {project.demoUrl && project.demoUrl !== "#" && (
+              <a
+                href={project.demoUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[#0D0D0D] hover:bg-neutral-800 text-white font-semibold text-sm transition-all shadow-xs hover:shadow-md hover:-translate-y-0.5 active:translate-y-0"
+              >
+                <span>Kunjungi Website Live</span>
+                <ExternalLink className="w-4 h-4" />
+              </a>
+            )}
 
-            <a
-              href={project.githubUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-white hover:bg-neutral-100 text-neutral-900 border border-neutral-200 font-semibold text-sm transition-colors shadow-xs"
-            >
-              <GithubIcon className="w-4 h-4" />
-              <span>Source Code GitHub</span>
-            </a>
+            {project.githubUrl && project.githubUrl !== "#" && (
+              <a
+                href={project.githubUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-white hover:bg-neutral-100 text-neutral-900 border border-neutral-200 font-semibold text-sm transition-colors shadow-xs"
+              >
+                <GithubIcon className="w-4 h-4" />
+                <span>Source Code GitHub</span>
+              </a>
+            )}
           </div>
         </div>
 
         {/* Cover Showcase Image */}
         <div className="relative aspect-[16/9] w-full rounded-2xl md:rounded-3xl overflow-hidden border border-neutral-200 shadow-md bg-neutral-100">
           <Image
-            src={project.image}
+            src={project.image || "/projects/manajemen-kontrakan.png"}
             alt={project.title}
             fill
             priority
             sizes="(max-width: 1200px) 100vw, 1000px"
             className="object-cover"
+            unoptimized={project.image?.startsWith("http")}
           />
         </div>
 
         {/* Detailed Case Study Sections */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 md:gap-14">
           {/* Left / Main Column: Overview & Highlights */}
-          <div className="lg:col-span-8 space-y-10">
+          <div className="lg:col-span-8 space-y-10 min-w-0">
             {/* Overview */}
-            <section className="p-7 sm:p-8 rounded-3xl bg-white border border-neutral-200 shadow-xs space-y-4">
+            <section className="p-7 sm:p-8 rounded-3xl bg-white border border-neutral-200 shadow-xs space-y-4 min-w-0">
               <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-neutral-500">
                 <Globe className="w-4 h-4 text-neutral-900" />
-                <span>Overview &amp; Tujuan Proyek</span>
+                <span>Overview & Tujuan Proyek</span>
               </div>
-              <h2 className="text-xl sm:text-2xl font-bold text-neutral-900">
-                Latar Belakang &amp; Solusi
+              <h2 className="text-xl sm:text-2xl font-bold text-neutral-900 break-words [overflow-wrap:anywhere]">
+                Latar Belakang & Solusi
               </h2>
-              <p className="text-sm sm:text-base text-neutral-600 leading-relaxed">
-                {project.longDescription}
+              <p className="text-sm sm:text-base text-neutral-600 leading-relaxed break-words [overflow-wrap:anywhere]">
+                {project.longDescription || project.description}
               </p>
             </section>
 
@@ -128,7 +133,7 @@ export default async function ProjectDetailPage({ params }: Props) {
               <section className="p-7 sm:p-8 rounded-3xl bg-white border border-neutral-200 shadow-xs space-y-6">
                 <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-neutral-500">
                   <Layers className="w-4 h-4 text-neutral-900" />
-                  <span>Fitur &amp; Arsitektur Utama</span>
+                  <span>Fitur & Arsitektur Utama</span>
                 </div>
                 <h2 className="text-xl sm:text-2xl font-bold text-neutral-900">
                   Kemampuan Sistem
@@ -228,11 +233,12 @@ export default async function ProjectDetailPage({ params }: Props) {
                   {/* Thumbnail Container */}
                   <div className="relative aspect-[16/10] w-full overflow-hidden bg-neutral-100 border-b border-neutral-200">
                     <Image
-                      src={otherProj.image}
+                      src={otherProj.image || "/projects/manajemen-kontrakan.png"}
                       alt={otherProj.title}
                       fill
                       sizes="(max-width: 768px) 100vw, 50vw"
                       className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                      unoptimized={otherProj.image?.startsWith("http")}
                     />
                   </div>
 
@@ -240,12 +246,12 @@ export default async function ProjectDetailPage({ params }: Props) {
                   <div className="p-6 md:p-8 flex flex-col flex-1 justify-between">
                     <div>
                       <div className="flex items-center justify-between gap-2 mb-2">
-                        <h3 className="text-xl md:text-2xl font-bold text-neutral-900 group-hover:text-black transition-colors">
+                        <h3 className="text-xl md:text-2xl font-bold text-neutral-900 group-hover:text-black transition-colors line-clamp-2">
                           {otherProj.title}
                         </h3>
                       </div>
 
-                      <p className="text-sm md:text-base text-neutral-600 leading-relaxed mb-6">
+                      <p className="text-sm md:text-base text-neutral-600 leading-relaxed mb-6 line-clamp-3">
                         {otherProj.description}
                       </p>
 
@@ -273,24 +279,28 @@ export default async function ProjectDetailPage({ params }: Props) {
                       </Link>
 
                       <div className="flex items-center gap-2">
-                        <a
-                          href={otherProj.githubUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          aria-label={`${otherProj.title} GitHub repository`}
-                          className="p-2 rounded-xl bg-neutral-100 hover:bg-neutral-900 text-neutral-700 hover:text-white border border-neutral-200 transition-colors"
-                        >
-                          <GithubIcon className="w-4 h-4" />
-                        </a>
-                        <a
-                          href={otherProj.demoUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          aria-label={`${otherProj.title} Live demo`}
-                          className="p-2 rounded-xl bg-[#0D0D0D] hover:bg-neutral-800 text-white transition-colors shadow-xs"
-                        >
-                          <ExternalLink className="w-4 h-4" />
-                        </a>
+                        {otherProj.githubUrl && otherProj.githubUrl !== "#" && (
+                          <a
+                            href={otherProj.githubUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            aria-label={`${otherProj.title} GitHub repository`}
+                            className="p-2 rounded-xl bg-neutral-100 hover:bg-neutral-900 text-neutral-700 hover:text-white border border-neutral-200 transition-colors"
+                          >
+                            <GithubIcon className="w-4 h-4" />
+                          </a>
+                        )}
+                        {otherProj.demoUrl && otherProj.demoUrl !== "#" && (
+                          <a
+                            href={otherProj.demoUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            aria-label={`${otherProj.title} Live demo`}
+                            className="p-2 rounded-xl bg-[#0D0D0D] hover:bg-neutral-800 text-white transition-colors shadow-xs"
+                          >
+                            <ExternalLink className="w-4 h-4" />
+                          </a>
+                        )}
                       </div>
                     </div>
                   </div>
