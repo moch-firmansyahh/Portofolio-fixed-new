@@ -1,7 +1,6 @@
 import SmoothScroll from "@/components/effects/SmoothScroll";
 import Preloader from "@/components/layout/Preloader";
 import AmbientCursor from "@/components/effects/AmbientCursor";
-import ScrollProgress from "@/components/effects/ScrollProgress";
 import Navbar from "@/components/layout/Navbar";
 import HeroSection from "@/components/sections/HeroSection";
 import TechMarquee from "@/components/effects/TechMarquee";
@@ -16,9 +15,6 @@ export default function Home() {
   return (
     <SmoothScroll>
       <div className="flex flex-col min-h-screen bg-[#F8F9FA] bg-grain-texture text-[#0F172A] relative selection:bg-neutral-900 selection:text-white">
-        {/* Top Scroll Progress Indicator */}
-        <ScrollProgress />
-
         {/* Preloader Curtain Reveal */}
         <Preloader />
 
