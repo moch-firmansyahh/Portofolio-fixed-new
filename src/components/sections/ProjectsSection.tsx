@@ -3,13 +3,14 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { ExternalLink, ArrowUpRight } from "lucide-react";
-import { GithubIcon } from "./icons";
+import { GithubIcon } from "@/components/ui/icons";
 import Image from "next/image";
 import Link from "next/link";
-import { PROJECTS as DEFAULT_PROJECTS, Project } from "@/data/portfolioData";
-import { getProjects } from "@/services/portfolioService";
-import ScrollReveal from "./ScrollReveal";
-import TiltCard from "./TiltCard";
+import { PROJECTS as DEFAULT_PROJECTS } from "@/data/portfolioData";
+import type { Project } from "@/types/project";
+import { getProjects } from "@/services/portfolio";
+import ScrollReveal from "@/components/effects/ScrollReveal";
+import TiltCard from "@/components/effects/TiltCard";
 
 export default function ProjectsSection() {
   const [projectsList, setProjectsList] = useState<Project[]>(DEFAULT_PROJECTS);
@@ -57,7 +58,7 @@ export default function ProjectsSection() {
 
             return (
               <ScrollReveal
-                key={project.id || index}
+                key={project.id || `project-${index}`}
                 direction="up"
                 distance={40}
                 duration={0.7}
@@ -92,9 +93,9 @@ export default function ProjectsSection() {
 
                         {project.tags && project.tags.length > 0 && (
                           <div className="flex flex-wrap gap-2 mb-6 min-w-0">
-                            {project.tags.map((tag) => (
+                            {project.tags.map((tag, tIdx) => (
                               <span
-                                key={tag}
+                                key={`${tag}-${tIdx}`}
                                 className="px-3 py-1 rounded-full bg-neutral-100 text-neutral-800 text-xs font-semibold max-w-full truncate"
                               >
                                 {tag}

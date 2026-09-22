@@ -10,6 +10,9 @@ const jakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL || "https://mochfirmansyah.dev"
+  ),
   title: "Moch. Firmansyah — Portfolio",
   description:
     "Portfolio of Moch. Firmansyah — Frontend Developer & Security Enthusiast specializing in React, Next.js, TypeScript, Tailwind CSS, and secure web architectures.",
@@ -40,6 +43,13 @@ export const metadata: Metadata = {
       "Crafting visually refined, high-performance, and secure web experiences with modern React, Next.js, and fluid animations.",
     type: "website",
     locale: "id_ID",
+    siteName: "Moch. Firmansyah Portfolio",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Moch. Firmansyah — Portfolio",
+    description:
+      "Frontend Developer & Security Enthusiast crafting refined, secure web applications.",
   },
 };
 

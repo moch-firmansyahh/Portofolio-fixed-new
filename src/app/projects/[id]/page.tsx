@@ -2,8 +2,8 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowLeft, ExternalLink, ArrowUpRight, CheckCircle2, Layers, Globe, Code2 } from "lucide-react";
-import { GithubIcon } from "@/components/icons";
-import { getProjectById, getProjects } from "@/services/portfolioService";
+import { GithubIcon } from "@/components/ui/icons";
+import { getProjectById, getProjects } from "@/services/portfolio";
 import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
@@ -32,15 +32,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function ProjectDetailPage({ params }: Props) {
   const { id } = await params;
-  const project = await getProjectById(id);
+  
+  // Ambil data proyek secara efisien dalam 1 pemanggilan
+  const allProjects = await getProjects();
+  const project = allProjects.find((p) => p.id === id);
 
   if (!project) {
     notFound();
   }
 
-  // Fetch all projects for other projects section
-  const allProjects = await getProjects();
-  const otherProjects = allProjects.filter((p) => p.id !== id && p.id !== project.id);
+  const otherProjects = allProjects.filter((p) => p.id !== id);
 
   return (
     <div className="min-h-screen bg-[#F8F9FA] bg-grain-texture text-[#0F172A] py-12 md:py-20 px-6 md:px-12 selection:bg-neutral-900 selection:text-white">

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Search,
@@ -23,21 +23,7 @@ export default function CommandPalette() {
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [copied, setCopied] = useState(false);
-
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
-        e.preventDefault();
-        setIsOpen((prev) => !prev);
-      }
-      if (e.key === "Escape") {
-        setIsOpen(false);
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []);
+  const [selectedIndex, setSelectedIndex] = useState(0);
 
   const handleCopyEmail = () => {
     navigator.clipboard.writeText(PERSONAL_INFO.email);
@@ -53,90 +39,139 @@ export default function CommandPalette() {
     }
   };
 
-  const ACTIONS = [
-    {
-      id: "home",
-      title: "Home",
-      category: "Navigation",
-      icon: Home,
-      action: () => navigateTo("#"),
-    },
-    {
-      id: "about",
-      title: "About Me",
-      category: "Navigation",
-      icon: User,
-      action: () => navigateTo("#about"),
-    },
-    {
-      id: "skills",
-      title: "Tech Stack & Skills",
-      category: "Navigation",
-      icon: Code2,
-      action: () => navigateTo("#skills"),
-    },
-    {
-      id: "projects",
-      title: "Featured Projects",
-      category: "Navigation",
-      icon: FolderGit2,
-      action: () => navigateTo("#projects"),
-    },
-    {
-      id: "experience",
-      title: "Pendidikan & Pengalaman",
-      category: "Navigation",
-      icon: Briefcase,
-      action: () => navigateTo("#experience"),
-    },
-    {
-      id: "contact",
-      title: "Hubungi Saya",
-      category: "Navigation",
-      icon: Mail,
-      action: () => navigateTo("#contact"),
-    },
-    {
-      id: "copy-email",
-      title: copied ? "Email Berhasil Disalin!" : "Salin Alamat Email",
-      category: "Quick Actions",
-      icon: copied ? CheckCircle2 : Copy,
-      action: handleCopyEmail,
-    },
-    {
-      id: "github",
-      title: "Buka Profil GitHub",
-      category: "Social",
-      icon: GithubIcon,
-      action: () => window.open(PERSONAL_INFO.socialLinks.github, "_blank"),
-    },
-    {
-      id: "linkedin",
-      title: "Buka Profil LinkedIn",
-      category: "Social",
-      icon: LinkedinIcon,
-      action: () => window.open(PERSONAL_INFO.socialLinks.linkedin, "_blank"),
-    },
-    {
-      id: "instagram",
-      title: "Buka Profil Instagram",
-      category: "Social",
-      icon: InstagramIcon,
-      action: () => window.open(PERSONAL_INFO.socialLinks.instagram, "_blank"),
-    },
-    {
-      id: "tiktok",
-      title: "Buka Profil TikTok",
-      category: "Social",
-      icon: TiktokIcon,
-      action: () => window.open(PERSONAL_INFO.socialLinks.tiktok, "_blank"),
-    },
-  ];
-
-  const filteredActions = ACTIONS.filter((item) =>
-    item.title.toLowerCase().includes(search.toLowerCase()) ||
-    item.category.toLowerCase().includes(search.toLowerCase())
+  const ACTIONS = useMemo(
+    () => [
+      {
+        id: "home",
+        title: "Home",
+        category: "Navigation",
+        icon: Home,
+        action: () => navigateTo("#"),
+      },
+      {
+        id: "about",
+        title: "About Me",
+        category: "Navigation",
+        icon: User,
+        action: () => navigateTo("#about"),
+      },
+      {
+        id: "skills",
+        title: "Tech Stack & Skills",
+        category: "Navigation",
+        icon: Code2,
+        action: () => navigateTo("#skills"),
+      },
+      {
+        id: "projects",
+        title: "Featured Projects",
+        category: "Navigation",
+        icon: FolderGit2,
+        action: () => navigateTo("#projects"),
+      },
+      {
+        id: "experience",
+        title: "Pendidikan & Pengalaman",
+        category: "Navigation",
+        icon: Briefcase,
+        action: () => navigateTo("#experience"),
+      },
+      {
+        id: "contact",
+        title: "Hubungi Saya",
+        category: "Navigation",
+        icon: Mail,
+        action: () => navigateTo("#contact"),
+      },
+      {
+        id: "copy-email",
+        title: copied ? "Email Berhasil Disalin!" : "Salin Alamat Email",
+        category: "Quick Actions",
+        icon: copied ? CheckCircle2 : Copy,
+        action: handleCopyEmail,
+      },
+      {
+        id: "github",
+        title: "Buka Profil GitHub",
+        category: "Social",
+        icon: GithubIcon,
+        action: () => window.open(PERSONAL_INFO.socialLinks.github, "_blank"),
+      },
+      {
+        id: "linkedin",
+        title: "Buka Profil LinkedIn",
+        category: "Social",
+        icon: LinkedinIcon,
+        action: () => window.open(PERSONAL_INFO.socialLinks.linkedin, "_blank"),
+      },
+      {
+        id: "instagram",
+        title: "Buka Profil Instagram",
+        category: "Social",
+        icon: InstagramIcon,
+        action: () => window.open(PERSONAL_INFO.socialLinks.instagram, "_blank"),
+      },
+      {
+        id: "tiktok",
+        title: "Buka Profil TikTok",
+        category: "Social",
+        icon: TiktokIcon,
+        action: () => window.open(PERSONAL_INFO.socialLinks.tiktok, "_blank"),
+      },
+    ],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [copied]
   );
+
+  const filteredActions = useMemo(
+    () =>
+      ACTIONS.filter(
+        (item) =>
+          item.title.toLowerCase().includes(search.toLowerCase()) ||
+          item.category.toLowerCase().includes(search.toLowerCase())
+      ),
+    [ACTIONS, search]
+  );
+
+  // Reset selectedIndex whenever search query changes
+  useEffect(() => {
+    setSelectedIndex(0);
+  }, [search]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Toggle Command Palette with Ctrl+K or Cmd+K
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        setIsOpen((prev) => !prev);
+        return;
+      }
+
+      if (!isOpen) return;
+
+      if (e.key === "Escape") {
+        setIsOpen(false);
+      } else if (e.key === "ArrowDown") {
+        e.preventDefault();
+        setSelectedIndex((prev) =>
+          prev < filteredActions.length - 1 ? prev + 1 : 0
+        );
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        setSelectedIndex((prev) =>
+          prev > 0 ? prev - 1 : filteredActions.length - 1
+        );
+      } else if (e.key === "Enter") {
+        e.preventDefault();
+        if (filteredActions[selectedIndex]) {
+          filteredActions[selectedIndex].action();
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, filteredActions, selectedIndex]);
 
   return (
     <>
@@ -185,7 +220,7 @@ export default function CommandPalette() {
                   autoFocus
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Ketik perintah atau cari menu..."
+                  placeholder="Ketik perintah atau cari menu... (Gunakan ↑ ↓ Enter)"
                   className="w-full bg-transparent text-sm text-neutral-900 placeholder-neutral-400 focus:outline-none"
                 />
                 <button
@@ -203,17 +238,28 @@ export default function CommandPalette() {
                     Tidak ada hasil untuk &ldquo;{search}&rdquo;
                   </div>
                 ) : (
-                  filteredActions.map((item) => {
+                  filteredActions.map((item, idx) => {
                     const IconComp = item.icon;
+                    const isSelected = idx === selectedIndex;
                     return (
                       <motion.button
                         key={item.id}
-                        whileHover={{ x: 3 }}
+                        onMouseEnter={() => setSelectedIndex(idx)}
                         onClick={item.action}
-                        className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-neutral-50 transition-colors text-left group cursor-pointer"
+                        className={`w-full flex items-center justify-between p-2.5 rounded-xl transition-all text-left group cursor-pointer ${
+                          isSelected
+                            ? "bg-neutral-100 border border-neutral-300"
+                            : "hover:bg-neutral-50 border border-transparent"
+                        }`}
                       >
                         <div className="flex items-center gap-3">
-                          <div className="p-1.5 rounded-lg bg-neutral-100 text-neutral-900 border border-neutral-200 group-hover:bg-[#0D0D0D] group-hover:text-white transition-colors">
+                          <div
+                            className={`p-1.5 rounded-lg border transition-colors ${
+                              isSelected
+                                ? "bg-[#0D0D0D] text-white border-neutral-900"
+                                : "bg-neutral-100 text-neutral-900 border-neutral-200 group-hover:bg-[#0D0D0D] group-hover:text-white"
+                            }`}
+                          >
                             <IconComp className="w-4 h-4" />
                           </div>
                           <div>
@@ -234,7 +280,15 @@ export default function CommandPalette() {
 
               {/* Footer Helper */}
               <div className="px-4 py-2 bg-[#F8FAFC] border-t border-[#E2E8F0] flex items-center justify-between text-[11px] text-[#64748B]">
-                <span>Navigasi &amp; Aksi Cepat</span>
+                <div className="flex items-center gap-2">
+                  <span>Navigasi:</span>
+                  <kbd className="font-mono text-[10px] bg-[#FFFFFF] px-1.5 py-0.5 rounded border border-[#E2E8F0]">
+                    ↑ ↓
+                  </kbd>
+                  <kbd className="font-mono text-[10px] bg-[#FFFFFF] px-1.5 py-0.5 rounded border border-[#E2E8F0]">
+                    ↵ Enter
+                  </kbd>
+                </div>
                 <kbd className="font-mono text-[10px] bg-[#FFFFFF] px-1.5 py-0.5 rounded border border-[#E2E8F0]">
                   ESC to close
                 </kbd>

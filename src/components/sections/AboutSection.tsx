@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import ScrollReveal from "./ScrollReveal";
-import { getProfile } from "@/services/portfolioService";
+import ScrollReveal from "@/components/effects/ScrollReveal";
+import { getProfile } from "@/services/portfolio";
 import { PERSONAL_INFO as DEFAULT_INFO } from "@/data/portfolioData";
+import type { PersonalInfo } from "@/types/profile";
 
 export default function AboutSection() {
-  const [profile, setProfile] = useState(DEFAULT_INFO);
+  const [profile, setProfile] = useState<PersonalInfo>(DEFAULT_INFO);
 
   useEffect(() => {
     let isMounted = true;
@@ -37,7 +38,7 @@ export default function AboutSection() {
           <div className="space-y-5 text-base sm:text-lg md:text-[19px] text-neutral-600 leading-relaxed font-normal">
             {profile.bio && profile.bio !== DEFAULT_INFO.bio ? (
               profile.bio.split("\n\n").map((paragraph, index) => (
-                <p key={index}>{paragraph}</p>
+                <p key={`bio-p-${index}`}>{paragraph}</p>
               ))
             ) : (
               <>

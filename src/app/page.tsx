@@ -1,50 +1,58 @@
-import SmoothScroll from "@/components/SmoothScroll";
-import Preloader from "@/components/Preloader";
-import AmbientCursor from "@/components/AmbientCursor";
-import Navbar from "@/components/Navbar";
-import HeroSection from "@/components/HeroSection";
-import TechMarquee from "@/components/TechMarquee";
-import AboutSection from "@/components/AboutSection";
-import SkillsSection from "@/components/SkillsSection";
-import ProjectsSection from "@/components/ProjectsSection";
-import ExperienceSection from "@/components/ExperienceSection";
-import ContactSection from "@/components/ContactSection";
-import Footer from "@/components/Footer";
+import SmoothScroll from "@/components/effects/SmoothScroll";
+import Preloader from "@/components/layout/Preloader";
+import AmbientCursor from "@/components/effects/AmbientCursor";
+import ScrollProgress from "@/components/effects/ScrollProgress";
+import CommandPalette from "@/components/ui/CommandPalette";
+import Navbar from "@/components/layout/Navbar";
+import HeroSection from "@/components/sections/HeroSection";
+import TechMarquee from "@/components/effects/TechMarquee";
+import AboutSection from "@/components/sections/AboutSection";
+import SkillsSection from "@/components/sections/SkillsSection";
+import ProjectsSection from "@/components/sections/ProjectsSection";
+import ExperienceSection from "@/components/sections/ExperienceSection";
+import ContactSection from "@/components/sections/ContactSection";
+import Footer from "@/components/layout/Footer";
 
 export default function Home() {
   return (
     <SmoothScroll>
       <div className="flex flex-col min-h-screen bg-[#F8F9FA] bg-grain-texture text-[#0F172A] relative selection:bg-neutral-900 selection:text-white">
+        {/* Top Scroll Progress Indicator */}
+        <ScrollProgress />
+
         {/* Preloader Curtain Reveal */}
         <Preloader />
 
         {/* Ambient Cursor Follower */}
         <AmbientCursor />
 
+        {/* Command Palette (Ctrl+K) */}
+        <CommandPalette />
+
         {/* Navigation Bar */}
         <Navbar />
 
         {/* Main Content */}
         <main className="flex-1 flex flex-col">
-          {/* 1. Hero Section with Magnetic CTAs & Scroll Parallax */}
+          {/* 1. Hero Section with Dynamic Role Animation & CTAs */}
           <HeroSection />
 
           {/* 2. Infinite Tech Stack Kinetic Marquee */}
           <TechMarquee />
 
-          {/* 3. About Section with 3D Tilt Card & Animated Stats Counter */}
+          {/* 3. About Section with Bio & Qualifications */}
           <AboutSection />
 
           {/* 4. Skills Section with Animated Sliding Tabs & Level Meters */}
           <SkillsSection />
 
-          {/* 5. Selected Featured Projects with Category Filters & Layout Animations */}
+          {/* 5. Selected Featured Projects with Live Data Fetching */}
           <ProjectsSection />
 
           {/* 6. Career & Learning Milestones with Dynamic Scroll Drawing Line */}
           <ExperienceSection />
 
-          {/* 7. Contact & Social Links with Celebration Confetti */}
+          {/* 7. Contact & Social Links with Secure API Route Submission */}
           <ContactSection />
         </main>
 

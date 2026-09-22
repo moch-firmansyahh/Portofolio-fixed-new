@@ -18,36 +18,45 @@ export default function Navbar() {
   const [hoveredNav, setHoveredNav] = useState<string | null>(null);
 
   useEffect(() => {
+    let ticking = false;
+
     const handleScroll = () => {
-      const scrollY = window.scrollY;
-      const aboutEl = document.getElementById("about");
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const scrollY = window.scrollY;
+          const aboutEl = document.getElementById("about");
 
-      // When at the top / Hero Section, reset activeSection so no tab is highlighted
-      if (!aboutEl || scrollY < aboutEl.offsetTop - 250) {
-        setActiveSection("");
-        return;
-      }
-
-      const scrollPosition = scrollY + 250;
-      let foundSection = "";
-
-      for (const link of NAV_LINKS) {
-        const sectionId = link.href.substring(1);
-        const el = document.getElementById(sectionId);
-        if (el) {
-          const top = el.offsetTop;
-          const height = el.offsetHeight;
-          if (scrollPosition >= top && scrollPosition < top + height) {
-            foundSection = sectionId;
-            break;
+          // When at the top / Hero Section, reset activeSection so no tab is highlighted
+          if (!aboutEl || scrollY < aboutEl.offsetTop - 250) {
+            setActiveSection("");
+            ticking = false;
+            return;
           }
-        }
-      }
 
-      setActiveSection(foundSection);
+          const scrollPosition = scrollY + 250;
+          let foundSection = "";
+
+          for (const link of NAV_LINKS) {
+            const sectionId = link.href.substring(1);
+            const el = document.getElementById(sectionId);
+            if (el) {
+              const top = el.offsetTop;
+              const height = el.offsetHeight;
+              if (scrollPosition >= top && scrollPosition < top + height) {
+                foundSection = sectionId;
+                break;
+              }
+            }
+          }
+
+          setActiveSection(foundSection);
+          ticking = false;
+        });
+        ticking = true;
+      }
     };
 
-    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 

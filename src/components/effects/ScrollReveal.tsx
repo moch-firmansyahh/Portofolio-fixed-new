@@ -65,7 +65,7 @@ export default function ScrollReveal({
       transition={{
         duration,
         delay,
-        ease: [0.16, 1, 0.3, 1], // Ultra-smooth deceleration curve
+        ease: [0.16, 1, 0.3, 1],
       }}
       className={className}
     >

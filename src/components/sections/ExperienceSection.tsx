@@ -3,9 +3,10 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { MapPin } from "lucide-react";
-import { EXPERIENCES as DEFAULT_EXPERIENCES, ExperienceItem } from "@/data/portfolioData";
-import { getExperiences } from "@/services/portfolioService";
-import ScrollReveal from "./ScrollReveal";
+import { EXPERIENCES as DEFAULT_EXPERIENCES } from "@/data/portfolioData";
+import type { ExperienceItem } from "@/types/experience";
+import { getExperiences } from "@/services/portfolio";
+import ScrollReveal from "@/components/effects/ScrollReveal";
 
 export default function ExperienceSection() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -19,7 +20,9 @@ export default function ExperienceSection() {
         if (isMounted && liveExps && liveExps.length > 0) {
           setExperiences(liveExps);
         }
-      } catch (_) {}
+      } catch (err) {
+        console.warn("Failed to load experiences:", err);
+      }
     }
     loadExperiences();
     return () => {
@@ -60,7 +63,7 @@ export default function ExperienceSection() {
             const isEven = index % 2 === 0;
             return (
               <div
-                key={index}
+                key={exp.id || `${exp.company}-${exp.role}-${index}`}
                 className={`relative flex flex-col md:flex-row items-start ${
                   isEven ? "md:flex-row-reverse" : ""
                 } gap-6 md:gap-12`}
@@ -112,9 +115,9 @@ export default function ExperienceSection() {
                       {/* Tech Used */}
                       {exp.technologies && exp.technologies.length > 0 && (
                         <div className="flex flex-wrap gap-1.5 pt-3 border-t border-[#E2E8F0]">
-                          {exp.technologies.map((tech) => (
+                          {exp.technologies.map((tech, tIdx) => (
                             <span
-                              key={tech}
+                              key={`${tech}-${tIdx}`}
                               className="px-2.5 py-0.5 rounded-md bg-[#F1F5F9] text-[11px] font-medium text-[#0F172A]"
                             >
                               {tech}

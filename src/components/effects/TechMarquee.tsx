@@ -40,7 +40,7 @@ export default function TechMarquee() {
       >
         {[...MARQUEE_ITEMS, ...MARQUEE_ITEMS].map((item, index) => (
           <div
-            key={index}
+            key={`${item}-${index}`}
             className="inline-flex items-center gap-4 text-sm sm:text-base font-bold text-neutral-500 tracking-tight uppercase group hover:text-black transition-colors"
           >
             <span className="text-neutral-900 group-hover:text-black transition-colors">

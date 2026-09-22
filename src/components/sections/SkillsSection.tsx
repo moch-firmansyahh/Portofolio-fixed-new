@@ -155,7 +155,7 @@ export default function SkillsSection() {
                 : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
             }`}
           >
-            {SKILL_CATEGORIES[activeTab].skills.map((skill) => {
+            {SKILL_CATEGORIES[activeTab].skills.map((skill, sIdx) => {
               const isCertTab = activeTab === 4;
               const percentValue =
                 skill.level === "Expert"
@@ -168,7 +168,7 @@ export default function SkillsSection() {
 
               return (
                 <motion.div
-                  key={skill.name}
+                  key={`${skill.name}-${sIdx}`}
                   variants={skillCardVariants}
                   whileHover={{ y: -4, scale: 1.01 }}
                   transition={{ type: "spring", stiffness: 350, damping: 20 }}

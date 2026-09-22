@@ -12,18 +12,21 @@ import {
   MessageSquare,
   AlertCircle,
 } from "lucide-react";
-import { GithubIcon, LinkedinIcon, InstagramIcon, TiktokIcon } from "./icons";
+import { GithubIcon, LinkedinIcon, InstagramIcon, TiktokIcon } from "@/components/ui/icons";
 import confetti from "canvas-confetti";
 import { PERSONAL_INFO as DEFAULT_INFO } from "@/data/portfolioData";
-import { sendMessage, getProfile } from "@/services/portfolioService";
+import { getProfile } from "@/services/portfolio";
+import { sendContactMessage } from "@/services/contact";
+import type { PersonalInfo } from "@/types/profile";
 
 export default function ContactSection() {
-  const [profile, setProfile] = useState(DEFAULT_INFO);
+  const [profile, setProfile] = useState<PersonalInfo>(DEFAULT_INFO);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     subject: "",
     message: "",
+    botField: "",
   });
   const [copiedEmail, setCopiedEmail] = useState(false);
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
@@ -37,7 +40,9 @@ export default function ContactSection() {
         if (isMounted && liveProfile) {
           setProfile(liveProfile);
         }
-      } catch (_) {}
+      } catch (err) {
+        console.warn("Using fallback profile in ContactSection:", err);
+      }
     }
     loadProfile();
     return () => {
@@ -54,6 +59,8 @@ export default function ContactSection() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name.trim() || !formData.email.trim() || !formData.message.trim()) {
+      setStatus("error");
+      setErrorMessage("Mohon lengkapi nama, email, dan pesan Anda.");
       return;
     }
 
@@ -61,11 +68,12 @@ export default function ContactSection() {
     setErrorMessage("");
 
     try {
-      const res = await sendMessage({
-        name: formData.name,
-        email: formData.email,
-        subject: formData.subject,
-        message: formData.message,
+      const res = await sendContactMessage({
+        name: formData.name.trim(),
+        email: formData.email.trim(),
+        subject: formData.subject.trim(),
+        message: formData.message.trim(),
+        botField: formData.botField,
       });
 
       if (res.success) {
@@ -76,14 +84,16 @@ export default function ContactSection() {
           origin: { y: 0.8 },
           colors: ["#0F172A", "#334155", "#64748B", "#94A3B8", "#E2E8F0"],
         });
-        setFormData({ name: "", email: "", subject: "", message: "" });
+        setFormData({ name: "", email: "", subject: "", message: "", botField: "" });
       } else {
         setStatus("error");
         setErrorMessage(res.error || "Gagal mengirim pesan.");
       }
-    } catch (err: any) {
+    } catch (err) {
       setStatus("error");
-      setErrorMessage(err.message || "Terjadi kesalahan jaringan.");
+      setErrorMessage(
+        err instanceof Error ? err.message : "Terjadi kendala saat mengirim pesan. Coba lagi nanti."
+      );
     }
   };
 
@@ -284,6 +294,20 @@ export default function ContactSection() {
                 </motion.div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-5">
+                  {/* Honeypot field (hidden from real users, traps spam bots) */}
+                  <div className="hidden" aria-hidden="true" style={{ display: "none" }}>
+                    <input
+                      type="text"
+                      name="botField"
+                      tabIndex={-1}
+                      autoComplete="off"
+                      value={formData.botField}
+                      onChange={(e) =>
+                        setFormData({ ...formData, botField: e.target.value })
+                      }
+                    />
+                  </div>
+
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-1.5">
                       <label
@@ -336,7 +360,6 @@ export default function ContactSection() {
                     <input
                       id="subject"
                       type="text"
-                      required
                       value={formData.subject}
                       onChange={(e) =>
                         setFormData({ ...formData, subject: e.target.value })
@@ -365,6 +388,18 @@ export default function ContactSection() {
                       className="w-full px-4 py-3 rounded-xl bg-neutral-50 border border-neutral-200 text-sm text-neutral-900 placeholder-neutral-400 focus:outline-none focus:border-neutral-900 transition-colors resize-none"
                     />
                   </div>
+
+                  {/* Submission Error Alert */}
+                  {status === "error" && errorMessage && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs sm:text-sm flex items-start gap-2.5"
+                    >
+                      <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
+                      <span className="leading-snug">{errorMessage}</span>
+                    </motion.div>
+                  )}
 
                   <motion.button
                     whileHover={{ scale: 1.01 }}

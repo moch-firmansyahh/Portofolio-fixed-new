@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, ExternalLink, CheckCircle2, Sparkles, Calendar } from "lucide-react";
 import { GithubIcon } from "./icons";
 import Image from "next/image";
-import { Project } from "@/data/portfolioData";
+import type { Project } from "@/types/project";
 
 interface ProjectModalProps {
   project: Project | null;
@@ -126,25 +126,29 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
 
             {/* Action Links */}
             <div className="flex flex-wrap items-center gap-3 pt-4 border-t border-[#E2E8F0]">
-              <a
-                href={project.demoUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-[#0D0D0D] hover:bg-neutral-800 text-white font-semibold text-sm transition-all duration-200 shadow-xs"
-              >
-                <span>Kunjungi Website Live</span>
-                <ExternalLink className="w-4 h-4" />
-              </a>
+              {project.demoUrl && (
+                <a
+                  href={project.demoUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-[#0D0D0D] hover:bg-neutral-800 text-white font-semibold text-sm transition-all duration-200 shadow-xs"
+                >
+                  <span>Kunjungi Website Live</span>
+                  <ExternalLink className="w-4 h-4" />
+                </a>
+              )}
 
-              <a
-                href={project.githubUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-neutral-50 hover:bg-white border border-neutral-200 hover:border-neutral-400 text-neutral-900 hover:text-black font-semibold text-sm transition-colors"
-              >
-                <GithubIcon className="w-4 h-4" />
-                <span>Source Code</span>
-              </a>
+              {project.githubUrl && (
+                <a
+                  href={project.githubUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-neutral-50 hover:bg-white border border-neutral-200 hover:border-neutral-400 text-neutral-900 hover:text-black font-semibold text-sm transition-colors"
+                >
+                  <GithubIcon className="w-4 h-4" />
+                  <span>Source Code</span>
+                </a>
+              )}
             </div>
           </div>
         </motion.div>

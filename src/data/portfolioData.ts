@@ -1,42 +1,9 @@
-export interface Project {
-  id: string;
-  title: string;
-  subtitle: string;
-  description: string;
-  longDescription: string;
-  tags: string[];
-  category: string;
-  featured: boolean;
-  image: string;
-  demoUrl: string;
-  githubUrl: string;
-  metrics?: string;
-  highlights: string[];
-  year: string;
-}
+import type { Project } from "@/types/project";
+import type { Skill, SkillCategory } from "@/types/skill";
+import type { ExperienceItem } from "@/types/experience";
+import type { PersonalInfo } from "@/types/profile";
 
-export interface SkillCategory {
-  title: string;
-  description: string;
-  skills: {
-    name: string;
-    level: string;
-    highlight?: boolean;
-    issuer?: string;
-    issueDate?: string;
-    credentialId?: string;
-  }[];
-}
-
-export interface ExperienceItem {
-  period: string;
-  role: string;
-  company: string;
-  location: string;
-  description: string;
-  technologies: string[];
-  type: "Work" | "Education" | "Freelance";
-}
+export type { Project, Skill, SkillCategory, ExperienceItem, PersonalInfo };
 
 export const PERSONAL_INFO = {
   name: "Moch. Firmansyah",

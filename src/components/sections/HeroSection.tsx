@@ -5,7 +5,8 @@ import gsap from "gsap";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { ArrowDown, ArrowUpRight } from "lucide-react";
 import { PERSONAL_INFO as DEFAULT_INFO } from "@/data/portfolioData";
-import { getProfile } from "@/services/portfolioService";
+import { getProfile } from "@/services/portfolio";
+import type { PersonalInfo } from "@/types/profile";
 
 const DEFAULT_TYPEWRITER_PHRASES = [
   "Moch. Firmansyah",
@@ -55,7 +56,7 @@ function TypewriterText({ phrases }: { phrases: string[] }) {
 }
 
 export default function HeroSection() {
-  const [profile, setProfile] = useState(DEFAULT_INFO);
+  const [profile, setProfile] = useState<PersonalInfo>(DEFAULT_INFO);
   const heroRef = useRef<HTMLDivElement>(null);
   const titleLine1Ref = useRef<HTMLHeadingElement>(null);
   const titleLine2Ref = useRef<HTMLHeadingElement>(null);
