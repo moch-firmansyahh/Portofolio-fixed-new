@@ -245,7 +245,7 @@ export default function HeroSection() {
             <TypewriterText phrases={typewriterList} />
           </div>
           <p className="text-base sm:text-lg text-neutral-600 font-normal leading-relaxed">
-            {profile.tagline || DEFAULT_INFO.tagline}
+            {profile.about || profile.subheadline || DEFAULT_INFO.about}
           </p>
         </div>
 

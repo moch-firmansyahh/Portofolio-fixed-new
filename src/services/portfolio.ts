@@ -45,10 +45,14 @@ interface DbSkillRow {
 
 interface DbProfileRow {
   name?: string;
+  role?: string;
   headline?: string;
   subheadline?: string;
+  about?: string;
   tagline?: string;
   bio?: string;
+  status?: string;
+  shortName?: string;
   location?: string;
   email?: string;
   phone?: string;
@@ -217,13 +221,14 @@ export async function getProfile(): Promise<PersonalInfo> {
 
     return {
       name: row.name || STATIC_PERSONAL_INFO.name,
-      shortName: STATIC_PERSONAL_INFO.shortName,
-      role: row.headline || STATIC_PERSONAL_INFO.role,
+      shortName: row.shortName || STATIC_PERSONAL_INFO.shortName,
+      role: row.role || row.headline || STATIC_PERSONAL_INFO.role,
       headline: row.headline,
-      subheadline: row.subheadline,
-      tagline: row.tagline || STATIC_PERSONAL_INFO.tagline,
-      bio: row.bio || STATIC_PERSONAL_INFO.bio,
-      status: STATIC_PERSONAL_INFO.status,
+      subheadline: row.subheadline || row.about || STATIC_PERSONAL_INFO.subheadline,
+      about: (row.about && row.about.trim().length > 0) ? row.about : STATIC_PERSONAL_INFO.about,
+      tagline: (row.tagline && row.tagline.trim().length > 0) ? row.tagline : STATIC_PERSONAL_INFO.tagline,
+      bio: (row.bio && row.bio.trim().length > 0) ? row.bio : STATIC_PERSONAL_INFO.bio,
+      status: row.status || STATIC_PERSONAL_INFO.status,
       location: row.location || STATIC_PERSONAL_INFO.location,
       email: row.email || STATIC_PERSONAL_INFO.email,
       phone: row.phone || STATIC_PERSONAL_INFO.phone,

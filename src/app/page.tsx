@@ -2,7 +2,6 @@ import SmoothScroll from "@/components/effects/SmoothScroll";
 import Preloader from "@/components/layout/Preloader";
 import AmbientCursor from "@/components/effects/AmbientCursor";
 import ScrollProgress from "@/components/effects/ScrollProgress";
-import CommandPalette from "@/components/ui/CommandPalette";
 import Navbar from "@/components/layout/Navbar";
 import HeroSection from "@/components/sections/HeroSection";
 import TechMarquee from "@/components/effects/TechMarquee";
@@ -25,9 +24,6 @@ export default function Home() {
 
         {/* Ambient Cursor Follower */}
         <AmbientCursor />
-
-        {/* Command Palette (Ctrl+K) */}
-        <CommandPalette />
 
         {/* Navigation Bar */}
         <Navbar />

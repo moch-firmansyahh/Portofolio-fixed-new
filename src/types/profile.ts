@@ -16,6 +16,7 @@ export interface PersonalInfo {
   role?: string;
   headline?: string;
   subheadline?: string;
+  about?: string;
   tagline: string;
   bio: string;
   status?: string;

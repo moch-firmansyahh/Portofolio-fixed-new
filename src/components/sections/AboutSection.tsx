@@ -36,7 +36,7 @@ export default function AboutSection() {
           </h2>
 
           <div className="space-y-5 text-base sm:text-lg md:text-[19px] text-neutral-600 leading-relaxed font-normal">
-            {profile.bio && profile.bio !== DEFAULT_INFO.bio ? (
+            {profile.bio && profile.bio.trim().length > 0 && profile.bio !== DEFAULT_INFO.bio ? (
               profile.bio.split("\n\n").map((paragraph, index) => (
                 <p key={`bio-p-${index}`}>{paragraph}</p>
               ))
