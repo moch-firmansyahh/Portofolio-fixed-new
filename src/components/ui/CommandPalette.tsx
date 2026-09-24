@@ -16,17 +16,34 @@ import {
   CheckCircle2,
   X,
 } from "lucide-react";
-import { PERSONAL_INFO } from "@/data/portfolioData";
+import { PERSONAL_INFO as DEFAULT_INFO } from "@/data/portfolioData";
+import { getProfile } from "@/services/portfolio";
+import { PersonalInfo } from "@/types/profile";
 import { GithubIcon, LinkedinIcon, InstagramIcon, TiktokIcon } from "./icons";
 
 export default function CommandPalette() {
+  const [profile, setProfile] = useState<PersonalInfo>(DEFAULT_INFO);
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [copied, setCopied] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
 
+  useEffect(() => {
+    let isMounted = true;
+    getProfile()
+      .then((live) => {
+        if (isMounted && live) {
+          setProfile(live);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   const handleCopyEmail = () => {
-    navigator.clipboard.writeText(PERSONAL_INFO.email);
+    navigator.clipboard.writeText(profile.email);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -95,32 +112,32 @@ export default function CommandPalette() {
         title: "Buka Profil GitHub",
         category: "Social",
         icon: GithubIcon,
-        action: () => window.open(PERSONAL_INFO.socialLinks.github, "_blank"),
+        action: () => window.open(profile.socialLinks.github, "_blank"),
       },
       {
         id: "linkedin",
         title: "Buka Profil LinkedIn",
         category: "Social",
         icon: LinkedinIcon,
-        action: () => window.open(PERSONAL_INFO.socialLinks.linkedin, "_blank"),
+        action: () => window.open(profile.socialLinks.linkedin, "_blank"),
       },
       {
         id: "instagram",
         title: "Buka Profil Instagram",
         category: "Social",
         icon: InstagramIcon,
-        action: () => window.open(PERSONAL_INFO.socialLinks.instagram, "_blank"),
+        action: () => window.open(profile.socialLinks.instagram, "_blank"),
       },
       {
         id: "tiktok",
         title: "Buka Profil TikTok",
         category: "Social",
         icon: TiktokIcon,
-        action: () => window.open(PERSONAL_INFO.socialLinks.tiktok, "_blank"),
+        action: () => window.open(profile.socialLinks.tiktok, "_blank"),
       },
     ],
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [copied]
+    [copied, profile]
   );
 
   const filteredActions = useMemo(

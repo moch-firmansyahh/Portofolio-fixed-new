@@ -12,7 +12,13 @@ export const PERSONAL_INFO = {
   tagline: "Code that looks good. Systems that stay safe.",
   about: "Mahasiswa Informatika Telkom University yang fokus memadukan Frontend Development modern dengan pemahaman Network & Web Security untuk menciptakan aplikasi web yang responsif, interaktif, dan aman.",
   subheadline: "Mahasiswa Informatika Telkom University yang fokus memadukan Frontend Development modern dengan pemahaman Network & Web Security untuk menciptakan aplikasi web yang responsif, interaktif, dan aman.",
-  bio: "Sebagai mahasiswa Teknik Informatika di Telkom University, saya berdedikasi untuk menerapkan keterampilan analitis dan keahlian teknis saya dalam peran Front-End Developer. Memiliki pengalaman langsung membangun aplikasi web modern menggunakan React dan Next.js, serta ketertarikan mendalam pada Cyber Security & Secure Coding untuk menciptakan aplikasi web yang aman, terpercaya, dan berperforma tinggi.",
+  bio: `Sebagai mahasiswa **Teknik Informatika di Telkom University**, saya berdedikasi untuk menerapkan keterampilan analitis dan keahlian teknis saya dalam peran **Front-End Developer** di industri teknologi. Latar belakang akademik telah membekali saya dengan fondasi yang kuat dalam pemrograman, pengembangan web modern, dan pengelolaan basis data.
+
+Saya memiliki pengalaman langsung dalam membangun aplikasi web menggunakan **React** dan **Next.js**, didukung oleh pemahaman yang solid dalam pengembangan front-end maupun back-end, termasuk perancangan dan manajemen database.
+
+Di samping pengembangan antarmuka, saya memiliki ketertarikan mendalam pada **Cyber Security** dan **Network Security**. Berbekal sertifikasi spesialisasi dari Google, saya aktif menerapkan prinsip **Secure Coding** dan validasi data ketat guna memastikan setiap aplikasi web yang saya bangun tidak hanya estetik dan responsif, tetapi juga aman dan terlindungi.
+
+Saya bersemangat untuk memanfaatkan keahlian ini dalam menciptakan antarmuka yang ramah pengguna, berkinerja tinggi, serta berkontribusi pada pengembangan solusi web yang inovatif dan terukur (*scalable*).`,
   status: "Available for opportunities",
   location: "Bandung, Indonesia",
   email: "firmanajah366@gmail.com",
