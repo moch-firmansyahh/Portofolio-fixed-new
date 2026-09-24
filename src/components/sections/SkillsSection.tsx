@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import { SKILL_CATEGORIES as STATIC_SKILL_CATEGORIES } from "@/data/portfolioData";
 import { getSkillCategories } from "@/services/portfolio";
+import { supabase } from "@/lib/supabase/client";
 import type { SkillCategory } from "@/types/skill";
 
 function GoogleLogo({ className = "w-5 h-5" }: { className?: string }) {
@@ -97,8 +98,25 @@ export default function SkillsSection() {
       }
     }
     loadLiveSkillCategories();
+
+    // Realtime Supabase Subscription untuk Keahlian / Skills
+    const channel = supabase
+      .channel("realtime-skills-web")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "skills" },
+        () => {
+          loadLiveSkillCategories();
+        }
+      )
+      .subscribe();
+
+    window.addEventListener("focus", loadLiveSkillCategories);
+
     return () => {
       isMounted = false;
+      supabase.removeChannel(channel);
+      window.removeEventListener("focus", loadLiveSkillCategories);
     };
   }, []);
 

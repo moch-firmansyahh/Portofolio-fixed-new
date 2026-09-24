@@ -9,6 +9,7 @@ import Link from "next/link";
 import { PROJECTS as DEFAULT_PROJECTS } from "@/data/portfolioData";
 import type { Project } from "@/types/project";
 import { getProjects } from "@/services/portfolio";
+import { supabase } from "@/lib/supabase/client";
 import ScrollReveal from "@/components/effects/ScrollReveal";
 import TiltCard from "@/components/effects/TiltCard";
 
@@ -29,8 +30,25 @@ export default function ProjectsSection() {
       }
     }
     loadDynamicProjects();
+
+    // Realtime Supabase Subscription untuk Proyek
+    const channel = supabase
+      .channel("realtime-projects-web")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "projects" },
+        () => {
+          loadDynamicProjects();
+        }
+      )
+      .subscribe();
+
+    window.addEventListener("focus", loadDynamicProjects);
+
     return () => {
       isMounted = false;
+      supabase.removeChannel(channel);
+      window.removeEventListener("focus", loadDynamicProjects);
     };
   }, []);
 

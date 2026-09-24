@@ -6,6 +6,7 @@ import { MapPin } from "lucide-react";
 import { EXPERIENCES as DEFAULT_EXPERIENCES } from "@/data/portfolioData";
 import type { ExperienceItem } from "@/types/experience";
 import { getExperiences } from "@/services/portfolio";
+import { supabase } from "@/lib/supabase/client";
 import ScrollReveal from "@/components/effects/ScrollReveal";
 
 export default function ExperienceSection() {
@@ -25,8 +26,25 @@ export default function ExperienceSection() {
       }
     }
     loadExperiences();
+
+    // Realtime Supabase Subscription untuk Pengalaman
+    const channel = supabase
+      .channel("realtime-experiences-web")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "experiences" },
+        () => {
+          loadExperiences();
+        }
+      )
+      .subscribe();
+
+    window.addEventListener("focus", loadExperiences);
+
     return () => {
       isMounted = false;
+      supabase.removeChannel(channel);
+      window.removeEventListener("focus", loadExperiences);
     };
   }, []);
 

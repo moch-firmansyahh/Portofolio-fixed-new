@@ -16,6 +16,7 @@ import { GithubIcon, LinkedinIcon, InstagramIcon, TiktokIcon } from "@/component
 import confetti from "canvas-confetti";
 import { PERSONAL_INFO as DEFAULT_INFO } from "@/data/portfolioData";
 import { getProfile } from "@/services/portfolio";
+import { supabase } from "@/lib/supabase/client";
 import { sendContactMessage } from "@/services/contact";
 import type { PersonalInfo } from "@/types/profile";
 
@@ -45,8 +46,25 @@ export default function ContactSection() {
       }
     }
     loadProfile();
+
+    // Realtime Supabase Subscription untuk Seksi Kontak
+    const channel = supabase
+      .channel("realtime-contact-profile-web")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "profile" },
+        () => {
+          loadProfile();
+        }
+      )
+      .subscribe();
+
+    window.addEventListener("focus", loadProfile);
+
     return () => {
       isMounted = false;
+      supabase.removeChannel(channel);
+      window.removeEventListener("focus", loadProfile);
     };
   }, []);
 

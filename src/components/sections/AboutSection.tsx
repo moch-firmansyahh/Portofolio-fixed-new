@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import ScrollReveal from "@/components/effects/ScrollReveal";
 import { getProfile } from "@/services/portfolio";
+import { supabase } from "@/lib/supabase/client";
 import { PERSONAL_INFO as DEFAULT_INFO } from "@/data/portfolioData";
 import type { PersonalInfo } from "@/types/profile";
 
@@ -44,8 +45,25 @@ export default function AboutSection() {
       }
     }
     loadLiveProfile();
+
+    // Realtime Supabase Subscription untuk Seksi About
+    const channel = supabase
+      .channel("realtime-about-profile-web")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "profile" },
+        () => {
+          loadLiveProfile();
+        }
+      )
+      .subscribe();
+
+    window.addEventListener("focus", loadLiveProfile);
+
     return () => {
       isMounted = false;
+      supabase.removeChannel(channel);
+      window.removeEventListener("focus", loadLiveProfile);
     };
   }, []);
 
