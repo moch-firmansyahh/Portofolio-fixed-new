@@ -22,7 +22,7 @@ export interface PersonalInfo {
   status?: string;
   location: string;
   email: string;
-  phone: string;
+  phone?: string;
   avatar?: string;
   resumeUrl: string;
   socialLinks: SocialLinks;
