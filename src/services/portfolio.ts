@@ -306,16 +306,16 @@ function parseSingleDateScore(str?: string, isEnd = false): number {
   return year * 100 + month;
 }
 
-function sortExperiences<T extends { period?: string }>(items: T[]): T[] {
+export function sortExperiences<T extends { period?: string }>(items: T[]): T[] {
   return [...items].sort((a, b) => {
     const periodA = a.period || "";
     const periodB = b.period || "";
 
-    const partsA = periodA.split(/[-–—]/);
-    const partsB = periodB.split(/[-–—]/);
+    const partsA = periodA.split(/\s*(?:[-–—/]|to|s\/d|sampai|until)\s*/i).filter(Boolean);
+    const partsB = periodB.split(/\s*(?:[-–—/]|to|s\/d|sampai|until)\s*/i).filter(Boolean);
 
-    const endA = partsA.length >= 2 ? parseSingleDateScore(partsA[1], true) : parseSingleDateScore(partsA[0], false);
-    const endB = partsB.length >= 2 ? parseSingleDateScore(partsB[1], true) : parseSingleDateScore(partsB[0], false);
+    const endA = partsA.length >= 2 ? parseSingleDateScore(partsA[partsA.length - 1], true) : parseSingleDateScore(partsA[0], false);
+    const endB = partsB.length >= 2 ? parseSingleDateScore(partsB[partsB.length - 1], true) : parseSingleDateScore(partsB[0], false);
 
     if (endA !== endB) {
       return endB - endA;
@@ -355,5 +355,5 @@ export async function getExperiences(): Promise<ExperienceItem[]> {
     return sortExperiences(mapped);
   })();
 
-  return withTimeout(fetchPromise, 3500, STATIC_EXPERIENCES);
+  return withTimeout(fetchPromise, 3500, sortExperiences(STATIC_EXPERIENCES));
 }
